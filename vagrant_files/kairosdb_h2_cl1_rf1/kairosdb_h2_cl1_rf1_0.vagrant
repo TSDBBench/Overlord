@@ -1,0 +1,25 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Kairos with H2 on 1 VM
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm0"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.provision "shell", inline: "/root/change_hostname.sh vm0"
+  config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y update"
+  config.vm.provision "shell", privileged: false, inline: "wget -t 10 --retry-connrefused -nv \"https://github.com/kairosdb/kairosdb/releases/download/v1.0.0/kairosdb_1.0.0-1_all.deb\""
+  config.vm.provision "shell", inline: "dpkg -i kairosdb_1.0.0-1_all.deb"
+  config.vm.provision "shell", privileged: false,  inline: "rm kairosdb_1.0.0-1_all.deb"
+  config.vm.provision "shell", inline: "systemctl restart kairosdb.service"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files ]; then cp -r /vagrant/files ~/; fi"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d ~/files ]; then chmod +x -f ~/files/*.sh; exit 0; fi"
+  config.vm.provision "shell", privileged: false,  inline: "sleep 5"
+
+end

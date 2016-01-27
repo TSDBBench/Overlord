@@ -1,0 +1,15 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Rhombus with Cassandra on 5 VMs with Replication Factor 5
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm0"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+load 'basic/change_hostname.rb'
+load 'basic/update.rb'
+load 'basic/cassandra.rb'
+load 'basic/copy_files.rb'

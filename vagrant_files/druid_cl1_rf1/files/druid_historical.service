@@ -1,0 +1,14 @@
+[Unit]
+Description=Druid Historical Node
+After=druid_coordinator.service
+Requires=druid_coordinator.service
+Before=druid_middlemanager.service druid_overlord.service druid_broker.service
+
+[Service]
+ExecStart=/usr/bin/java -Xmx1g -Xms1g -XX:NewSize=512m -XX:MaxNewSize=512m -XX:MaxDirectMemorySize=8g -XX:+UseConcMarkSweepGC \
+-Duser.timezone=UTC -Dfile.encoding=UTF-8 \
+-classpath :/usr/share/java/mysql-connector-java.jar:/home/vagrant/druid-0.8.1/lib/*:/home/vagrant/config/historical:/home/vagrant/config/_common \
+io.druid.cli.Main server historical
+
+[Install]
+WantedBy=multi-user.target

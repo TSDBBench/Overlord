@@ -1,0 +1,46 @@
+{
+    "name" : "rhombus",
+    "replicationClass" : "SimpleStrategy",
+    "replicationFactors" : {
+        "replication_factor" : 2
+    },
+    "definitions" : [
+    {
+    "name": "usermetric",
+    "fields": [
+        {"name": "value", "type": "double"},
+        {"name": "TAG0", "type": "varchar"},
+        {"name": "TAG1", "type": "varchar"},
+        {"name": "TAG2", "type": "varchar"},
+        {"name": "TAGALWAYSSET1", "type": "bigint"}
+    ],
+    "indexes" : [
+        {
+            "key": "TAGALWAYSSET1",
+            "shardingStrategy": {"type": "ShardingStrategyNone"}
+        },
+        {
+            "key": "TAG0",
+            "shardingStrategy": {"type": "ShardingStrategyNone"}
+        },
+        {
+            "key": "TAG0:TAG1",
+            "shardingStrategy": {"type": "ShardingStrategyNone"}
+        },
+        {
+            "key": "TAG0:TAG1:TAG2",
+            "shardingStrategy": {"type": "ShardingStrategyNone"}
+        },
+        {
+            "key": "TAG1",
+            "shardingStrategy": {"type": "ShardingStrategyNone"}
+        },
+        {
+            "key": "TAG2",
+            "shardingStrategy": {"type": "ShardingStrategyNone"}
+        }
+    ]
+    }
+
+    ]
+}

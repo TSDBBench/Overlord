@@ -1,0 +1,13 @@
+[Unit]
+Description=Druid Broker Node
+After=druid_historical.service
+Requires=druid_historical.service
+
+[Service]
+ExecStart=/usr/bin/java -Xmx1g -Xms1g -XX:NewSize=512m -XX:MaxNewSize=512m -XX:MaxDirectMemorySize=2g -XX:+UseConcMarkSweepGC \
+-Duser.timezone=UTC -Dfile.encoding=UTF-8 \
+-classpath :/usr/share/java/mysql-connector-java.jar:/home/vagrant/druid-0.8.1/lib/*:/home/vagrant/config/broker:/home/vagrant/config/_common \
+io.druid.cli.Main server broker
+
+[Install]
+WantedBy=multi-user.target

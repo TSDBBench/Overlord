@@ -1,0 +1,4 @@
+use kairosdb;
+update column family data_points with read_repair_chance = 0.1;
+update column family row_key_index with read_repair_chance = 0.1;
+update column family string_index with read_repair_chance = 0.1;

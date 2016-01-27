@@ -1,0 +1,13 @@
+[Unit]
+Description=Druid Middlemanager Node
+After=druid_historical.service
+Requires=druid_historical.service
+
+[Service]
+ExecStart=/usr/bin/java -Xmx64m -Xms64m -XX:+UseConcMarkSweepGC \
+-Duser.timezone=UTC -Dfile.encoding=UTF-8 \
+-classpath :/usr/share/java/mysql-connector-java.jar:/home/vagrant/druid-0.8.1/lib/*:/home/vagrant/config/middleManager:/home/vagrant/config/_common \
+io.druid.cli.Main server middleManager
+
+[Install]
+WantedBy=multi-user.target

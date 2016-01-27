@@ -1,0 +1,16 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# NewTS with Cassandra on 1 VM
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm0"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+load 'basic/change_hostname.rb'
+load 'basic/update.rb'
+load 'basic/cassandra.rb'
+load 'basic/newts.rb'
+load 'basic/copy_files.rb'

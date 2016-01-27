@@ -1,0 +1,15 @@
+-- Creates a Table.
+
+-- Drop the table if it exists;
+DROP TABLE IF EXISTS usermetric;
+
+-- Create the usermetric table with 10 fields and 1 double value and Timestamp as key
+CREATE TABLE usermetric(
+  ID SERIAL PRIMARY KEY,
+  YCSB_KEY TIMESTAMP,
+  VALUE DOUBLE PRECISION,
+  TAG0 TEXT, TAG1 TEXT,
+  TAG2 TEXT, TAG3 TEXT,
+  TAG4 TEXT, TAG5 TEXT,
+  TAG6 TEXT, TAG7 TEXT,
+  TAG8 TEXT, TAG9 TEXT);

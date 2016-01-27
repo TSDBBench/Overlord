@@ -1,0 +1,12 @@
+[Unit]
+Description=Druid Cluster
+Requires=zookeeper.service mysql.service druid_coordinator.service druid_historical.service druid_middlemanager.service druid_overlord.service druid_broker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+RemainAfterExit=yes
+ExecStop=/bin/systemctl stop druid_coordinator.service druid_historical.service druid_middlemanager.service druid_overlord.service druid_broker.service
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Druid on 1 VM
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm0"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+load 'basic/change_hostname.rb'
+load 'basic/update.rb'
+load 'basic/mysql.rb'
+load 'basic/druid_mysql.rb'
+load 'basic/zookeeper.rb'
+load 'basic/druid.rb'
+load 'basic/copy_files.rb'

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Hook for automatic building and copying file for control-vm
+
+echo "Building ycsb-ts..."
+mvn -q clean package
+if [ $? -ne 0 ]; then
+    echo "Error: 'mvn -q clean package' did not return 0"
+    exit -1
+fi
+echo "Coping ycsb-*.*.*.tar.gz..."
+sudo cp distribution/target/ycsb-*.*.*.tar.gz /var/www/html/bin/
+if [ $? -ne 0 ]; then
+    echo "Error: 'sudo cp distribution/target/ycsb-*.*.*.tar.gz /var/www/html/bin/' did not return 0"
+fi
+exit 0

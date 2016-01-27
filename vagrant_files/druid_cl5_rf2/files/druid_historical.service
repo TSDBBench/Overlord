@@ -1,0 +1,11 @@
+[Unit]
+Description=Druid Historical Node
+
+[Service]
+ExecStart=/usr/bin/java -Xmx10g -Xms10g -XX:NewSize=6g -XX:MaxNewSize=6g -XX:MaxDirectMemorySize=12g -XX:+UseConcMarkSweepGC \
+-Duser.timezone=UTC -Dfile.encoding=UTF-8 \
+-classpath :/usr/share/java/mysql-connector-java.jar:/home/vagrant/druid-0.8.1/lib/*:/home/vagrant/config/historical:/home/vagrant/config/_common \
+io.druid.cli.Main server historical
+
+[Install]
+WantedBy=multi-user.target

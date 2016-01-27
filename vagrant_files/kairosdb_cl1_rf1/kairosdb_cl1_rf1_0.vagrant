@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Kairos with Cassandra on 1 VM
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm0"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.provision "shell", inline: "/root/change_hostname.sh vm0"
+  config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y update"
+  config.vm.provision "shell", privileged: false, inline: "wget -t 10 --retry-connrefused -nv \"https://github.com/kairosdb/kairosdb/releases/download/v1.0.0/kairosdb_1.0.0-1_all.deb\""
+  config.vm.provision "shell", inline: "dpkg -i kairosdb_1.0.0-1_all.deb"
+  config.vm.provision "shell", privileged: false,  inline: "rm kairosdb_1.0.0-1_all.deb"
+  config.vm.provision "shell", inline: "echo \"deb http://www.apache.org/dist/cassandra/debian 21x main\" >> /etc/apt/sources.list"
+  config.vm.provision "shell", inline: "echo \"deb-src http://www.apache.org/dist/cassandra/debian 21x main\" >> /etc/apt/sources.list"
+  config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y update"
+  config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y  install cassandra"
+  config.vm.provision "shell", inline: "systemctl stop kairosdb.service"
+  config.vm.provision "shell", inline: "systemctl stop cassandra.service"
+  config.vm.provision "shell", inline: "systemctl start cassandra.service"
+  config.vm.provision "shell", privileged: false,  inline: "sleep 60"
+  config.vm.provision "shell", inline: "sed -i \"s/kairosdb.service.datastore=org.kairosdb.datastore.h2.H2Module/#kairosdb.service.datastore=org.kairosdb.datastore.h2.H2Module/g\" /opt/kairosdb/conf/kairosdb.properties"
+  config.vm.provision "shell", inline: "sed -i \"s/#kairosdb.service.datastore=org.kairosdb.datastore.cassandra.CassandraModule/kairosdb.service.datastore=org.kairosdb.datastore.cassandra.CassandraModule/g\" /opt/kairosdb/conf/kairosdb.properties "
+  config.vm.provision "shell", inline: "systemctl start kairosdb.service"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files ]; then cp -r /vagrant/files ~/; fi"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d ~/files ]; then chmod +x -f ~/files/*.sh; exit 0; fi"
+  config.vm.provision "shell", privileged: false,  inline: "sleep 5"
+end

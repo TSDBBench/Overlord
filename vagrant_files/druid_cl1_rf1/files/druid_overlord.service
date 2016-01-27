@@ -1,0 +1,13 @@
+[Unit]
+Description=Druid Overlord Node
+After=druid_historical.service
+Requires=druid_historical.service
+
+[Service]
+ExecStart=/usr/bin/java -Xmx2g -Xms2g -XX:NewSize=256m -XX:MaxNewSize=256m -XX:+UseConcMarkSweepGC \
+-Duser.timezone=UTC -Dfile.encoding=UTF-8 \
+-classpath :/usr/share/java/mysql-connector-java.jar:/home/vagrant/druid-0.8.1/lib/*:/home/vagrant/config/overlord:/home/vagrant/config/_common \
+io.druid.cli.Main server overlord
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,23 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# OpenTSDB with HBase and Hadoop, 5 VMs, Replication = 2
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm4"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+load 'basic/change_hostname.rb'
+load 'basic/update.rb'
+load 'basic/zookeeper.rb'
+load 'basic/hadoop.rb'
+load 'basic/hadoop_cluster.rb'
+load 'basic/hbase.rb'
+load 'basic/hbase_cluster.rb'
+load 'basic/hbase_cluster_repl2.rb'
+load 'basic/hbase_lzo_copy.rb'
+load 'basic/opentsdb.rb'
+load 'basic/opentsdb_cluster.rb'
+load 'basic/copy_files.rb'

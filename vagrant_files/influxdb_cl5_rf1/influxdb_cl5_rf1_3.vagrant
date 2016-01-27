@@ -1,0 +1,19 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# InfluxDB on 5 VMs, Replication = 1
+# Third VM of Raft Cluster
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm3"
+# you only need 2 vms in INFLUXDBHOSTNAMES, but we use all 3 raft hosts
+INFLUXDBHOSTNAMES = "vm0:8088,vm1:8088,vm2:8088"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+load 'basic/change_hostname.rb'
+load 'basic/update.rb'
+load 'basic/influxdb.rb'
+load 'basic/influxdb_cluster.rb'
+load 'basic/copy_files.rb'

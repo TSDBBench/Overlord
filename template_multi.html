@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{{ title if title else "Bokeh Plot" }}</title>
+        {{ bokeh_js|indent(8)|safe }}
+        {{ bokeh_css|indent(8)|safe }}
+        {{ plot_script|indent(8)|safe }}
+    </head>
+    <body>
+        <div class="bk-bs-container">
+            <h1>{{ title if title else "Bokeh Plot" }}</h1>
+        </div>
+        {% if dbdesc and dbdesc != "" %}
+        <div class="bk-bs-container">
+            <strong>{{ dbdesc_name if dbdesc_name else "Database Descriptions:"}}</strong>
+            {{ dbdesc if dbdesc }}
+        </div>
+        {% endif %}
+        {% if description and description != "" %}
+        <div class="bk-bs-container">
+            <strong>{{ description_name if description_name else "Description:"}}</strong> {{ description if description }}
+        </div>
+        {% endif %}
+        {% if errors and errors != "" %}
+        <div class="bk-bs-container">
+            <strong>{{ errors if errors else "Errors?" }}</strong>
+        </div>
+        {% endif %}
+        {% if warnings and warnings != "" %}
+        <div class="bk-bs-container">
+            <strong>{{ warnings if warnings else "Warnings?" }}</strong>
+        </div>
+        {% endif %}
+        {% if exceptions and exceptions != "" %}
+        <div class="bk-bs-container">
+            <strong>{{ exceptions if exceptions else "Exceptions?" }}</strong>
+        </div>
+        {% endif %}
+        <div class="bk-bs-container">
+        {{ plot_div | safe }}
+        </div>
+        <div class="bk-bs-container">
+            <div class="bk-bs-row">
+                <!--<div class="bk-bs-col-md-4">-->
+                    <!--<h3>{{ results_table_name }}</h3>-->
+                    <!--<table class="bk-bs-table">-->
+                        <!--{{ results_table }}-->
+                    <!--</table>-->
+                <!--</div>-->
+                <div class="bk-bs-col-md-10">
+                    {{ block_results_table }}
+                </div>
+            </div>
+            <div class="bk-bs-row">
+                <div class="bk-bs-col-md-10">
+                    {{ general_results_table }}
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

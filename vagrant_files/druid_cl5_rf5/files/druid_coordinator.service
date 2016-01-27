@@ -1,0 +1,13 @@
+[Unit]
+Description=Druid Coordinator Node
+After=zookeeper.service mysql.service
+Requires=zookeeper.service mysql.service
+
+[Service]
+ExecStart=/usr/bin/java -Xmx10g -Xms10g -XX:NewSize=512m -XX:MaxNewSize=512m -XX:+UseG1GC \
+-Duser.timezone=UTC -Dfile.encoding=UTF-8 \
+-classpath :/usr/share/java/mysql-connector-java.jar:/home/vagrant/druid-0.8.1/lib/*:/home/vagrant/config/coordinator:/home/vagrant/config/_common \
+io.druid.cli.Main server coordinator
+
+[Install]
+WantedBy=multi-user.target

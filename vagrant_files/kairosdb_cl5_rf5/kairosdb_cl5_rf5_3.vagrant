@@ -1,0 +1,17 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Kairos with Cassandra on 5 VMs with Replication Factor 5
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm3"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+load 'basic/change_hostname.rb'
+load 'basic/update.rb'
+load 'basic/cassandra.rb'
+load 'basic/sleep_5.rb'
+load 'basic/copy_files.rb'
+
