@@ -28,3 +28,6 @@ end
 $links_ycsbts = 'http://nemarcontrolvm.iaas.uni-stuttgart.de/bin/ycsb-0.4.0.tar.gz'
 $links_blueflood = 'http://nemarcontrolvm.iaas.uni-stuttgart.de/bin/blueflood-all-2.0.0-SNAPSHOT-jar-with-dependencies.jar'
   
+# h5serv (hdf5) git commit ids
+$git_h5json = 'c31bfb7ff2da864a737ce9464ba1895b0d5af8f4'
+$git_h5serv = '18709351fb173697e323eb62828cb8868f2e1db3'

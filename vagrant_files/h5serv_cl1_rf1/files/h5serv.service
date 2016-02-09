@@ -1,0 +1,11 @@
+[Unit]
+Description=h5serv
+
+[Service]
+# User/Group is required, otherwise test will fail if started as root.
+User=vagrant
+Group=vagrant
+ExecStart=/usr/bin/python2.7 /home/vagrant/h5serv/server/app.py
+
+[Install]
+WantedBy=multi-user.target
