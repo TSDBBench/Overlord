@@ -44,3 +44,5 @@ data.csv
 */*/*/*.pdf
 */*/*/*/*.pdf
 *.idea
+run.sh
+run.log
