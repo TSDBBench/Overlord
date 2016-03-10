@@ -39,7 +39,7 @@ __version__ = "0.01"
 
 def getDict():
     dbConfig={}
-    dbConfig["db_folders"]=["/home/vagrant/hbase-1.1.2"]
+    dbConfig["db_folders"]=["/home/vagrant/hbase"]
     dbConfig["db_client"]="opentsdb"
     dbConfig["db_args"]="-p ip=%%IP%% -p port=4242"
     dbConfig["db_name"]="opentsdb_cl1_rf1"
@@ -54,9 +54,9 @@ def getDict():
     dbConfig["prerun_slaves"]= []
     dbConfig["postrun_slaves"]= []
     dbConfig["prerun_dict"]= {
-        0 : ["%%SSH%%sudo -s bash /home/vagrant/hbase-1.1.2/bin/start-hbase.sh",
+        0 : ["%%SSH%%sudo -s bash /home/vagrant/hbase/bin/start-hbase.sh",
              "%%SSH%%sudo -s bash -c 'sleep 10'",
-             "%%SSH%%sudo -s bash -c \"COMPRESSION=LZO HBASE_HOME=/home/vagrant/hbase-1.1.2 /usr/share/opentsdb/tools/create_table.sh\"",
+             "%%SSH%%sudo -s bash -c \"COMPRESSION=LZO HBASE_HOME=/home/vagrant/hbase /usr/share/opentsdb/tools/create_table.sh\"",
              "%%SSH%%sudo -s bash -c 'systemctl start opentsdb.service'",
              "%%SSH%%sudo -s bash -c '/usr/share/opentsdb/bin/tsdb mkmetric usermetric'"
              ],

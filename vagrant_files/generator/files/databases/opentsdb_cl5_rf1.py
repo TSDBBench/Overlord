@@ -82,9 +82,9 @@ def getDict():
         0 : ["%%SSH%%sudo -s bash -c '/home/vagrant/hadoop-2.7.1/bin/hdfs namenode -format test'",
              "%%SSH%%sudo -s bash /home/vagrant/hadoop-2.7.1/sbin/start-dfs.sh",
              #"%%SSH%%sudo -s bash /home/vagrant/hadoop-2.7.1/sbin/start-yarn.sh"
-             "%%SSH%%sudo -s bash /home/vagrant/hbase-1.1.2/bin/start-hbase.sh",
+             "%%SSH%%sudo -s bash /home/vagrant/hbase/bin/start-hbase.sh",
              "%%SSH%%sudo -s bash -c 'sleep 10'",
-             "%%SSH%%sudo -s bash -c \"COMPRESSION=LZO HBASE_HOME=/home/vagrant/hbase-1.1.2 /usr/share/opentsdb/tools/create_table.sh\"",
+             "%%SSH%%sudo -s bash -c \"COMPRESSION=LZO HBASE_HOME=/home/vagrant/hbase /usr/share/opentsdb/tools/create_table.sh\"",
              "%%SSH%%sudo -s bash -c 'systemctl start opentsdb.service'",
              "%%SSH%%sudo -s bash -c '/usr/share/opentsdb/bin/tsdb mkmetric usermetric'"
              ],

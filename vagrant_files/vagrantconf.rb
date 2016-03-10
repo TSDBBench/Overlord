@@ -31,3 +31,6 @@ $links_blueflood = 'http://nemarcontrolvm.iaas.uni-stuttgart.de/bin/blueflood-al
 # h5serv (hdf5) git commit ids
 $git_h5json = 'c31bfb7ff2da864a737ce9464ba1895b0d5af8f4'
 $git_h5serv = '18709351fb173697e323eb62828cb8868f2e1db3'
+
+# hbase
+$links_hbase = 'http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist/hbase/1.1.3/hbase-1.1.3-bin.tar.gz'
