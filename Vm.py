@@ -13,7 +13,7 @@ from fabric.api import *
 
 class Vm():
 
-    vagrantFolder=None
+    vagrantFolders=None
     pathVagrantfile=None
     credFiles=None
     basicFilesFolder=None
@@ -28,13 +28,13 @@ class Vm():
     provider=None
     ip=None
 
-    # vagrantFolder: Folder inside which vagrantfiles+folders are
+    # vagrantFolders: Folders inside which vagrantfiles+folders are
     # tmpFolder: Path to tempfolder
     # name: name of the VM
     # logger: Logger instance
     # logging: if true, vagrant debug logging will be done
-    def __init__(self, vagrantFolder, credFiles, basicFilesFolder, tmpFolder, name, logger, provider, logging):
-        self.vagrantFolder = vagrantFolder
+    def __init__(self, vagrantFolders, credFiles, basicFilesFolder, tmpFolder, name, logger, provider, logging):
+        self.vagrantFolders = vagrantFolders
         self.credFiles=credFiles
         self.basicFilesFolder=basicFilesFolder
         self.tmpFolder = tmpFolder
@@ -75,26 +75,28 @@ class Vm():
                 return False
         pathName=self.name.rsplit("_",1)[0] # Name is something like VMNAME_1, split _1 away!
         # copy to tmpfolder (already checked that it exist, need to check if vm folder exists)
-        path=os.path.join(self.vagrantFolder,pathName)
+        paths=Util.create_folder_path_list(self.vagrantFolders, [pathName])
         pathTmp=os.path.join(self.tmpFolder,self.name)
-        if not Util.check_folder(path, self.logger, False):
+        if not Util.check_folders(paths, self.logger, False, True, True):
             return False
         if not Util.check_folder(pathTmp, self.logger, True):
             return False
         # Copy Vagrantfile in place
         pathVagrantFileOld=os.path.join(pathTmp,"%s.vagrant"%(self.name))
         pathVagrantFileNew=os.path.join(pathTmp,"Vagrantfile")
-        if not Util.copy_folder(path,pathTmp,self.logger):
+        if not Util.copy_folders(paths,pathTmp,self.logger, True):
             return False
         self.pathFolder=pathTmp
         for credFile in self.credFiles:
-            pathCredFileOld=os.path.join(self.vagrantFolder,credFile)
-            pathCredFileNew=os.path.join(pathTmp,credFile)
-            if not Util.copy_file(pathCredFileOld,pathCredFileNew,self.logger):
-                return False
-        pathBasicFileFolderOld=os.path.join(self.vagrantFolder,self.basicFilesFolder)
+            credFilesOld = Util.create_folder_path_list(self.vagrantFolders, [credFile])
+            pathCredFileNew = os.path.join(pathTmp,credFile)
+            for credFileOld in credFilesOld:
+                if Util.check_file_exists(credFileOld):
+                    if not Util.copy_file(credFileOld,pathCredFileNew,self.logger):
+                        return False
+        basicFileFoldersOld=Util.create_folder_path_list(self.vagrantFolders, [self.basicFilesFolder])
         pathBasicFileFolderNew=os.path.join(pathTmp,self.basicFilesFolder)
-        if not Util.copy_folder(pathBasicFileFolderOld,pathBasicFileFolderNew,self.logger):
+        if not Util.copy_folders(basicFileFoldersOld,pathBasicFileFolderNew,self.logger, True):
                 return False
         if not Util.copy_file(pathVagrantFileOld,pathVagrantFileNew,self.logger):
             return False

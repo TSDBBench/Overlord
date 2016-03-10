@@ -203,7 +203,7 @@ def cleanup_vms(vmDict,logger, linear):
 parser = argparse.ArgumentParser(prog="TSDBBench.py",version=__version__,description="Bla", formatter_class=argparse.RawDescriptionHelpFormatter, epilog="")
 parser.add_argument("-l", "--log", action='store_true', help="Be more verbose, log vagrant output.")
 parser.add_argument("-t", "--tmpfolder", metavar="TMP", required=True, help="Path to Temp Space")
-parser.add_argument("-f", "--vagrantfolder", metavar="VAGRANT", required=True, help="Path to folder with Vagrantfiles")
+parser.add_argument("-f", "--vagrantfolders", metavar="VAGRANT", nargs='+', required=True, help="Path to folder(s) with Vagrantfiles. Files from additional folder(s) overwrite existing files from preceding folder(s).")
 parser.add_argument("-w", "--workload", metavar="WORKLOAD", help="Only process workload WORKLOAD")
 parser.add_argument("-d", "--databases", metavar="DATABASES", nargs='+', help="Only process workloads for all machines for DATABASE (Generator will always be created!), Set to 'all' for all DATABASES, set to 'test' for some special test DB set.)")
 parser.add_argument("-n", "--nodestroy", action='store_true', help="Do not destroy VMs")
@@ -232,11 +232,16 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 # File checks and deletions (if necessary)
-if not Util.check_folder(args.vagrantfolder,logger):
-    exit(-1)
+for folder in args.vagrantfolders:
+    if not Util.check_folder(folder,logger):
+        exit(-1)
 for vagrantCredFile in vagrantCredFiles:
-    if not Util.check_file_exists(os.path.join(args.vagrantfolder,vagrantCredFile)):
-        logger.error("%s not found." %(os.path.join(args.vagrantfolder,vagrantCredFile)))
+    found_cred_file = False
+    for folder in args.vagrantfolders:
+        if Util.check_file_exists(os.path.join(folder,vagrantCredFile)):
+           found_cred_file = True
+    if not found_cred_file:
+        logger.error("%s not found in any of the given vagrantfolders (%s)." %(vagrantCredFile, args.vagrantfolders))
         exit(-1)
 if not Util.check_folder(args.tmpfolder,logger):
     exit(-1)
@@ -250,15 +255,18 @@ dbs={} # dictinary of db vms
 
 # Generating Generator VMs
 generatorFound=False
-for path in sorted(os.listdir(args.vagrantfolder)):
-    if os.path.isdir(os.path.join(args.vagrantfolder,path)) and path == "generator":
+for path, dir in Util.unsorted_paths(args.vagrantfolders,logger,"",True):
+    if os.path.isdir(os.path.join(path, dir)) and dir == "generator":
         generatorFound=True
         found=0 # how many .vagrant files are found, At least 1 is needed!
-        for path2 in sorted(os.listdir(os.path.join(args.vagrantfolder,"generator"))):
-            if os.path.isfile(os.path.join(args.vagrantfolder,"generator",path2)):
-                split = path2.rsplit(".vagrant",1)
+        # search in all generator folders
+        for path, file in Util.unsorted_paths(args.vagrantfolders,logger, "generator", True):
+            if os.path.isfile(os.path.join(path, file)):
+                split = file.rsplit(".vagrant", 1)
                 # if rsplit is used on bla.vagrant, the result should be ["bla",""]
                 if len(split)>1 and split[1] == "":
+                    if split[0] in generators.keys():
+                        continue
                     found+=1
                     # check if Generator, generator, Generator_1, etcpp. as machine is used, but always create if
                     # something else than Generator is given (Generator is always created!)
@@ -267,7 +275,7 @@ for path in sorted(os.listdir(args.vagrantfolder)):
                             or (args.databases and Util.check_if_eq_databases(split[0], args.databases)) \
                             or (args.databases and Util.check_if_eq_databases(split[0].rsplit("_",1)[0], args.databases)):
                         if args.linear:
-                            virtMachine =  Vm.Vm(args.vagrantfolder, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
+                            virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                             virtMachine.create_vm()
                             generators[virtMachine.name] = virtMachine
                             if not virtMachine.created:
@@ -276,17 +284,17 @@ for path in sorted(os.listdir(args.vagrantfolder)):
                                     cleanup_vms(generators,logger, args.linear)
                                 exit(-1)
                         else:
-                            virtMachine =  Vm.Vm(args.vagrantfolder, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
+                            virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                             virtMachine.start()
                             Util.sleep_random(1.0,5.0)  # needed for openstack, otherwise two vms get the same floating ip
                             generators[virtMachine.name] = virtMachine
         if found == 0:
-            logger.error("No .vagrant files found in %s." %(os.path.join(args.vagrantfolder,"generator")))
+            logger.error("No .vagrant files found in %s." %(Util.unsorted_paths(args.vagrantfolders, logger, "generator")))
             exit(-1)
         break
 
 if not generatorFound:
-    logger.error("No Generator found, %s does not exist." %(os.path.join(args.vagrantfolder,"generator")))
+    logger.error("No Generator found, %s does not exist." %(Util.unsorted_paths(args.vagrantfolders, logger, "generator")))
     exit(-1)
 
 if args.databases and (Util.check_if_eq_databases("generator",args.databases) or Util.check_if_eq_databases_rsplit("generator",args.databases)):
@@ -304,6 +312,8 @@ if args.databases and (Util.check_if_eq_databases("generator",args.databases) or
     exit(0)
 
 ycsbfiles=[]
+processedDatabaseVMs=[] # for multi-vagrantfolder-function
+processedDatabases=[]
 
 # Doing Tests if basic or test is in given dbs
 if args.databases and (Util.check_if_eq_databases("basic", args.databases) or Util.check_if_eq_databases("test", args.databases)):
@@ -334,27 +344,29 @@ if args.databases and (Util.check_if_eq_databases("basic", args.databases) or Ut
 else:
     # Generating Database VMs
     logger.info("Processing Database VMs" )
-    for path in sorted(os.listdir(args.vagrantfolder)):
-        if os.path.isdir(os.path.join(args.vagrantfolder,path)):
-            if path=="generator" or path.find(".")==0:
+    for path, dir in Util.unsorted_paths(args.vagrantfolders, logger, "", False):
+        if os.path.isdir(os.path.join(path, dir)):
+            if dir== "generator" or dir.find(".")==0 or dir in processedDatabases:
                 continue
             found=0 # how many .vagrant files are found, At least 1 is needed!
             if not args.databases or args.databases == "" \
-                    or (args.databases and not Util.check_if_eq_databases(path, args.databases) and not Util.check_if_eq_databases("all", args.databases)):
+                    or (args.databases and not Util.check_if_eq_databases(dir, args.databases) and not Util.check_if_eq_databases("all", args.databases)):
                 continue
-            logger.info("Processing %s." %(path))
-            for path2 in sorted(os.listdir(os.path.join(args.vagrantfolder,path))):
-                if os.path.isfile(os.path.join(args.vagrantfolder,path, path2)):
-                    split = path2.rsplit(".vagrant",1)
+            logger.info("Processing %s." % (dir))
+            for path2, file in Util.unsorted_paths(args.vagrantfolders, logger, dir, True):
+                if os.path.isfile(os.path.join(path, dir, file)):
+                    split = file.rsplit(".vagrant", 1)
                     # if rsplit is used on bla.vagrant, the result should be ["bla",""]
                     if len(split)>1 and split[1] == "":
                         found+=1
                         if args.databases and args.databases != None and args.databases != [] \
+                                and split[0] not in processedDatabaseVMs \
                                 and (Util.check_if_eq_databases(split[0], args.databases) \
                                 or Util.check_if_eq_databases(split[0].rsplit("_",1)[0], args.databases) \
                                 or Util.check_if_eq_databases("all", args.databases)):
+                            processedDatabaseVMs.append(split[0])
                             if args.linear:
-                                virtMachine =  Vm.Vm(args.vagrantfolder, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
+                                virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                                 virtMachine.create_vm()
                                 dbs[virtMachine.name] = virtMachine
                                 if not virtMachine.created:
@@ -364,10 +376,11 @@ else:
                                         cleanup_vms(dbs, logger, args.linear)
                                     exit(-1)
                             else:
-                                virtMachine =  Vm.Vm(args.vagrantfolder, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
+                                virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                                 virtMachine.start()
                                 Util.sleep_random(1.0,5.0)  # needed for openstack, otherwise two vms get the same floating ip
                                 dbs[virtMachine.name] = virtMachine
+            processedDatabases.append(dir)
             if not args.linear:
                 for generatorKey in generators.keys():
                     logger.info("Wait for creation of %s to finish." %(generators[generatorKey].name))
@@ -388,21 +401,21 @@ else:
                             cleanup_vms(dbs, logger, args.linear)
                         exit(-1)
             if found == 0:
-                logger.error("No .vagrant files found in %s." %(os.path.join(args.vagrantfolder,path)))
+                logger.error("No .vagrant files found in %s." % (Util.unsorted_paths(args.vagrantfolders, logger, dir)))
 
 
             if args.workload:
                 logger.info("Starting workload '%s' on %s on Generator %s." %(args.workload,dbs[dbs.keys()[0]].vm.hostname(),generators[generators.keys()[0]].vm.hostname()))
-                run_workload(generators, dbs, path, args.workload, args.timeseries, args.granularity, args.bucket, False, False, args.log, logger)
+                run_workload(generators, dbs, dir, args.workload, args.timeseries, args.granularity, args.bucket, False, False, args.log, logger)
                 logger.info("Waiting for workload to finish...")
                 wait_for_vm(dbs, logger, 3600, args.noshutdown)
-                ycsbFile = get_ycsb_file(generators[generators.keys()[0]].vm,path.lower(),args.workload.lower(),logger)
+                ycsbFile = get_ycsb_file(generators[generators.keys()[0]].vm, dir.lower(), args.workload.lower(), logger)
                 ycsbfiles.append(ycsbFile)
                 if args.nohup:
                     logger.info("Trying to fetch nohup files from generators.")
                     nohupCounter=0
                     for generatorKey in generators.keys():
-                        get_remote_file(generators[generatorKey].vm,"/home/vagrant/nohup.out","./nohup_%s_%s_%s.out" %(path.lower(),args.workload.lower(),nohupCounter),logger)
+                        get_remote_file(generators[generatorKey].vm,"/home/vagrant/nohup.out","./nohup_%s_%s_%s.out" % (dir.lower(), args.workload.lower(), nohupCounter), logger)
                         rm_remote_file(generators[generatorKey].vm,"/home/vagrant/nohup.out",logger)
                         nohupCounter+=1;
 
@@ -412,12 +425,12 @@ else:
 
             else:
                 logger.info("No Workload given, just running Prerun commands.")
-                run_workload(generators, dbs, path, args.workload, args.timeseries, args.granularity, args.bucket, False, True, args.log, logger)
+                run_workload(generators, dbs, dir, args.workload, args.timeseries, args.granularity, args.bucket, False, True, args.log, logger)
                 if args.nohup:
                     logger.info("Trying to fetch nohup files from generators.")
                     nohupCounter=0
                     for generatorKey in generators.keys():
-                        get_remote_file(generators[generatorKey].vm,"/home/vagrant/nohup.out","./nohup_%s_%s_%s.out" %(path.lower(),"none",nohupCounter),logger)
+                        get_remote_file(generators[generatorKey].vm,"/home/vagrant/nohup.out","./nohup_%s_%s_%s.out" % (dir.lower(), "none", nohupCounter), logger)
                         rm_remote_file(generators[generatorKey].vm,"/home/vagrant/nohup.out",logger)
                         nohupCounter+=1;
 

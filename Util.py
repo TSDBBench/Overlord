@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Andreas Bader'
-__version__ = "0.01"
+__version__ = "0.02"
 
 import os
 import shutil
 import time
 import random
+import distutils
+from distutils import dir_util
 
 def check_file_readable(filename):
     if check_file_exists(filename) and os.access(filename, os.R_OK):
@@ -20,7 +22,7 @@ def check_file_exists(filename):
     return False
 
 # Check if folder exists
-def check_folder(path,logger,reverseLogic=False, noError=False):
+def check_folder(path, logger, reverseLogic=False, noError=False):
     if not(os.path.isdir(path) and os.path.exists(path)):
         if not reverseLogic:
             if not noError:
@@ -34,6 +36,20 @@ def check_folder(path,logger,reverseLogic=False, noError=False):
         if not noError:
             logger.error("%s does exist." %(path))
         return False
+
+def check_folders(paths, logger, reverseLogic=False, noError=False, oneIsEnough=False):
+    if not oneIsEnough:
+        return_value = True
+    else:
+        return_value = False
+    for path in paths:
+        if not check_folder(path, logger, reverseLogic, noError):
+            if not oneIsEnough:
+                return_value = False
+        else:
+            if oneIsEnough:
+                return_value = True
+    return return_value
 
 def delete_folder(path,logger,no_error=False):
     if check_folder(path,logger):
@@ -64,11 +80,35 @@ def delete_file(path,logger,no_error=False):
 
 def copy_folder(path1,path2,logger):
     try:
-        shutil.copytree(path1, path2, symlinks=False, ignore=None)
-    except Exception, e:
+        # distutils required here as shutil.copytree can not overwrite directories which is needed for multiple vagrant folders
+        distutils.dir_util.copy_tree(path1, path2, preserve_mode=1, preserve_times=1, preserve_symlinks=1, update=0, verbose=0, dry_run=0)
+    except distutils.dir_util.DistutilsFileError, e:
         logger.error('Failed to copy %s to %s.' %(path1,path2), exc_info=True)
         return False
     return True
+
+def copy_folders(paths,path2,logger,ignore_not_existing=False):
+    return_value = True
+    for path in paths:
+        if ignore_not_existing and not check_folder(path,logger,False,True):
+            continue
+        if not copy_folder(path, path2, logger):
+            return_value = False
+    return return_value
+
+# creates a list from a list of touples (path+folder)
+def create_folder_path_list(path_and_folders):
+    new_list = []
+    for element in path_and_folders:
+        new_list.append(os.path.join(element[0], element[1]))
+    return new_list
+
+def create_folder_path_list(paths, folders):
+    new_list = []
+    for path in paths:
+        for folder in folders:
+            new_list.append(os.path.join(path, folder))
+    return new_list
 
 def copy_file(path1,path2,logger):
     try:
@@ -189,3 +229,25 @@ def get_random_int_with_chosen_default(start, end, chosenList, defaultList):
 
 def log_timestamp(str,logger):
     logger.debug("Timestamp at %s" %(str))
+
+def sorted_paths(path_list, logger, append_path="", sort=True, reverse=False, return_seperated=True):
+    unsorted_list = []
+
+    for folder in path_list:
+        # list of files/dirs inside a directory always sorted
+        act_path = os.path.join(folder,append_path)
+        if not check_folder(act_path,logger, False,True):
+            continue
+        for dir in sorted(os.listdir(act_path)):
+            if return_seperated:
+                unsorted_list.append((act_path,dir))
+            else:
+                unsorted_list.append(os.path.join(act_path,dir))
+    if sort:
+        unsorted_list = sorted(unsorted_list)
+    if reverse:
+        unsorted_list = list(reversed(unsorted_list))
+    return unsorted_list
+
+def unsorted_paths(path_list, logger, append_path="", reverse=False, return_seperated=True):
+    return sorted_paths(path_list, logger, append_path, False, reverse, return_seperated)
