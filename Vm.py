@@ -149,7 +149,11 @@ class Vm():
             return False
 
     def get_ip(self):
-        result = self.run_with_output (True,'sudo ifconfig | grep -E -o "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" | head -n1',True, True)
+        head_str = " | head -n1"
+        if self.provider == "virtualbox":
+            # virtualbox uses second network interface for vm-interconnections
+            head_str =  " | head -n4 | tail -n1"
+        result = self.run_with_output (True,'sudo ifconfig | grep -E -o "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"%s' % (head_str),True, True)
         if result.return_code == 0:
             return result.stdout
         else:

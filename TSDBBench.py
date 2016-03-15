@@ -20,7 +20,7 @@ testDBs=['basicdb','basicjdbc','basickairosdb','basicopentsdb']
 vagrantCredFiles=["vagrantconf.rb", "vagrantconf_gen.rb", "vagrantconf_db.rb"]
 vagrantBasicFilesFolder="basic"
 
-availProviders=['vsphere', 'openstack'] # First one is default
+availProviders=['virtualbox', 'vsphere', 'openstack'] # First one is default
 
 def run_workload(genDict, dbDict, dbName, workloadName, timeseries, granularity, bucket, test, onlyPrerun, debug, logger):
     if test:

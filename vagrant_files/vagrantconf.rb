@@ -22,6 +22,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     openstack.floating_ip_pool   = ''
     openstack.openstack_image_url = ''
   end
+  config.vm.provider :virtualbox do |virtualbox|
+    config.vm.box                = "tsdbbench-debian"
+    virtualbox.gui                 = false
+    config.vm.network "private_network", type: "dhcp"
+  end
 end
 
 # links to prepackaged/precompiled stuff
