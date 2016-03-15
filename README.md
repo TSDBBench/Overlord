@@ -1,4 +1,5 @@
 # TSDBBench
+[![Build Status](https://api.travis-ci.org/TSDBBench/TSDBBench.svg?branch=master)](https://travis-ci.org/TSDBBench/TSDBBench)
 The Python and Vagrant part of TSDBBench
 
 The VMs are running on vSphere or Openstack, but you can choose to run TSDBBench.py on your local pc or on a Control VM.
