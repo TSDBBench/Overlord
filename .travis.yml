@@ -2,6 +2,17 @@ language: python
 
 python:
   - "2.7"
-  
+
+install:
+  - pip install -r requirements.txt
+
 script: 
   - python RunWorkload.py -h
+  - python MakeDebianIso.py -h
+  - python MakeDebianQcow2.py -h
+  - python MakeDebianVB.py -h
+  - python ProcessYcsbLog.py -h
+  - python SetupVsphere.py -h
+
+# Use the Container based infrastructure.
+sudo: false

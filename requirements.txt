@@ -1,0 +1,9 @@
+fabric
+python-dateutil
+pyvmomi
+jinja2
+python-magic
+bokeh
+pandas
+pdfkit
+webcolors
