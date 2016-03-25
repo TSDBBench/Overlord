@@ -42,8 +42,8 @@ def getDict():
     dbConfig["db_folders"]=["/var/lib/postgresql/9.4/main"]
     dbConfig["db_client"]="jdbc"
     dbConfig["db_args"]="-p jdbc.driver=org.postgresql.Driver -p db.url=jdbc:postgresql://%%IP%%/test -p db.user=vagrant -p db.passwd=vagrant"
-    dbConfig["db_name"]="postgres_cl1_rf1"
-    dbConfig["db_desc"]="Postgres DB on 1 VM."
+    dbConfig["db_name"]="postgresql_cl1_rf1"
+    dbConfig["db_desc"]="PostgreSQL DB on 1 VM."
     dbConfig["jvm_args"]="-jvm-args='-Xmx4096m'"
     dbConfig["prerun_once"]= []
     dbConfig["postrun_once"]= []
@@ -51,8 +51,7 @@ def getDict():
         "PGPASSWORD=vagrant psql -h \"%%IP%%\" -U postgres -c 'create database test'",
         "PGPASSWORD=vagrant psql test -h \"%%IP%%\" -U postgres -c \"create user vagrant password 'vagrant';\"",
         "PGPASSWORD=vagrant psql test -h \"%%IP%%\" -U postgres -c \"GRANT ALL PRIVILEGES ON DATABASE test TO vagrant;\"",
-        "%%SSH%%PGPASSWORD=vagrant psql -U vagrant test -f '/home/vagrant/files/create_table.psql'",
-        "%%SSH%%sudo -s bash -c 'echo -e \"host    all             all             %%IPgen%%         md5\" >> /etc/postgresql/9.4/main/pg_hba.conf'"]
+        "%%SSH%%PGPASSWORD=vagrant psql -U vagrant test -f '/home/vagrant/files/create_table.psql'"]
     dbConfig["postrun"]= []
     dbConfig["prerun_master"]= []
     dbConfig["postrun_master"]= []

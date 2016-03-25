@@ -27,6 +27,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     virtualbox.gui                 = false
     config.vm.network "private_network", type: "dhcp"
   end
+  config.vm.provider :digital_ocean do |digitalocean, override|
+    # See https://github.com/devopsgroup-io/vagrant-digitalocean for configuration details
+    override.ssh.private_key_path = "~/.ssh/id_rsa"
+    digitalocean.token = ""
+    digitalocean.region = "fra1" # private networking must be supported in this region
+    digitalocean.private_networking = true
+    digitalocean.ipv6 = false
+    digitalocean.setup = true
+    digitalocean.backups_enabled = false
+  end
 end
 
 # links to prepackaged/precompiled stuff

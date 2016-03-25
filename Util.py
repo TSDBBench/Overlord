@@ -8,6 +8,7 @@ import os
 import shutil
 import time
 import random
+import string
 import distutils
 from distutils import dir_util
 
@@ -251,3 +252,6 @@ def sorted_paths(path_list, logger, append_path="", sort=True, reverse=False, re
 
 def unsorted_paths(path_list, logger, append_path="", reverse=False, return_seperated=True):
     return sorted_paths(path_list, logger, append_path, False, reverse, return_seperated)
+
+def get_random_string(length=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.SystemRandom().choice(chars) for _ in range(length))

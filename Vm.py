@@ -9,6 +9,7 @@ import time
 import vagrant
 import os
 import Util
+import re
 from fabric.api import *
 
 class Vm():
@@ -98,8 +99,36 @@ class Vm():
         pathBasicFileFolderNew=os.path.join(pathTmp,self.basicFilesFolder)
         if not Util.copy_folders(basicFileFoldersOld,pathBasicFileFolderNew,self.logger, True):
                 return False
-        if not Util.copy_file(pathVagrantFileOld,pathVagrantFileNew,self.logger):
-            return False
+        if self.provider == "digital_ocean":
+            # digital ocean needs a random name, otherwise we always get problems with multiple measurements
+            if Util.check_file_exists(pathVagrantFileNew):
+                self.logger.error("'%s' does already exist." %(pathVagrantFileNew))
+                return False
+            try:
+                file_old = open(pathVagrantFileOld, "r")
+                file_new = open(pathVagrantFileNew, "w")
+                for line in file_old:
+                    if re.match(r'^\s*HOSTNAME\s+=\s+("[^"]+"|\'[^\']+\')\s*$',line) != None:
+                        split_res = re.search(r'("[^"]+"|\'[^\']+\')',line)
+                        if split_res != None:
+                            # allowed are numbers, letters, hyphens and dots
+                            file_new.write("HOSTNAME = \"%s-%s\"\n" %(split_res.group()[1:-1],
+                                                                      Util.get_random_string(10)))
+                        else:
+                            self.logger.warning("Could not parse hostname out of '%s'. "
+                                                "Using the default. Errors can occur." % (line))
+                            file_new.write(line)
+                    else:
+                        file_new.write(line)
+                file_new.flush()
+                file_new.close()
+                file_old.close()
+            except Exception,e:
+                self.logger.error("An error occured while copying '%s' to '%s'." % (pathVagrantFileOld,
+                                                                                    pathVagrantFileNew), exc_info=True)
+        else:
+            if not Util.copy_file(pathVagrantFileOld,pathVagrantFileNew,self.logger):
+                return False
         self.pathVagrantfile=pathVagrantFileNew
         Util.clear_vagrant_files(pathTmp,self.logger)
         # Create VM
@@ -150,7 +179,7 @@ class Vm():
 
     def get_ip(self):
         head_str = " | head -n1"
-        if self.provider == "virtualbox":
+        if self.provider in ["virtualbox", "digital_ocean"]:
             # virtualbox uses second network interface for vm-interconnections
             head_str =  " | head -n4 | tail -n1"
         result = self.run_with_output (True,'sudo ifconfig | grep -E -o "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"%s' % (head_str),True, True)

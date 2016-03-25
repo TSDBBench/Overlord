@@ -20,7 +20,7 @@ testDBs=['basicdb','basicjdbc','basickairosdb','basicopentsdb']
 vagrantCredFiles=["vagrantconf.rb", "vagrantconf_gen.rb", "vagrantconf_db.rb"]
 vagrantBasicFilesFolder="basic"
 
-availProviders=['virtualbox', 'vsphere', 'openstack'] # First one is default
+availProviders=['virtualbox', 'vsphere', 'openstack', 'digital_ocean'] # First one is default
 
 def run_workload(genDict, dbDict, dbName, workloadName, timeseries, granularity, bucket, test, onlyPrerun, debug, logger):
     if test:
@@ -74,7 +74,7 @@ def wait_for_vm(vms, logger, timeout=3600, noshutdown=False):
     if noshutdown:
         logger.info("Noshutdown is activated, trying to boot it up again.")
         for vmKey in sorted(vms.keys()):
-            vms[vmKey].vm.up(provider="vsphere")
+            vms[vmKey].vm.up()
     return True
 
 def get_remote_file(vm,remotePath,localPath,logger):
@@ -230,6 +230,10 @@ handler.setLevel(logLevel)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+
+if args.provider == "digital_ocean" and not args.linear:
+    logger.warning("Provider '%s' does not support parallel creation of VMs. Linear creation is automatically enabled. See https://github.com/devopsgroup-io/vagrant-digitalocean/pull/230 for further details." % args.provider)
+    args.linear = True
 
 # File checks and deletions (if necessary)
 for folder in args.vagrantfolders:

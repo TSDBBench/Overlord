@@ -1,8 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Druid on 5 VMs with Replication Factor = 1
-
 VAGRANTFILE_API_VERSION = "2"
 
 HOSTNAME = "vm0"
@@ -12,9 +10,5 @@ load 'vagrantconf_db.rb'
 load 'basic/provider_specific.rb'
 load 'basic/change_hostname.rb'
 load 'basic/update.rb'
-load 'basic/mysql.rb'
-load 'basic/libmysql.rb'
-load 'basic/druid_mysql.rb'
-load 'basic/zookeeper.rb'
-load 'basic/druid.rb'
+load 'basic/postgresql.rb'
 load 'basic/copy_files.rb'

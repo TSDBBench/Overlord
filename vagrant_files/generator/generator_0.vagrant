@@ -7,21 +7,22 @@ HOSTNAME = "gen0"
 
 load 'vagrantconf.rb'
 load 'vagrantconf_gen.rb'
+load 'basic/provider_specific.rb'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision "shell", inline: "/root/change_hostname.sh gen0"
   config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y update"
   config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y  install postgresql-client mysql-client libmysql-java libpostgresql-jdbc-java libcsv-java"
-  config.vm.provision "shell", privileged: false,  inline: "if [ \\( -f /vagrant/files/ycsb.tar.gz -a -r /vagrant/files/ycsb.tar.gz \\) -o \\( -f /vagrant/files/ycsb-0.4.0.tar.gz -a -r /vagrant/files/ycsb-0.4.0.tar.gz \\) ]; then if [ -f /vagrant/files/ycsb-0.4.0.tar.gz ]; then mv /vagrant/files/ycsb-0.4.0.tar.gz ycsb.tar.gz; else mv /vagrant/files/ycsb.tar.gz .; fi; else wget -O ycsb.tar.gz -t 10 --retry-connrefused -nv \"#{$links_ycsbts}\" ; fi"
-  config.vm.provision "shell", privileged: false,  inline: "tar xfvz ycsb.tar.gz"
-  config.vm.provision "shell", privileged: false,  inline: "rm ycsb.tar.gz"
-  config.vm.provision "shell", privileged: false,  inline: "mv ycsb-0.4.0 ycsb"  
-  config.vm.provision "shell", privileged: false,  inline: "if [ -d ~/ycsb/jdbc-binding/lib/ ]; then ln -s /usr/share/java/mysql-connector-java.jar ~/ycsb/jdbc-binding/lib/; fi"
-  config.vm.provision "shell", privileged: false,  inline: "if [ -d ~/ycsb/jdbc-binding/lib/ ]; then ln -s /usr/share/java/postgresql-jdbc4.jar ~/ycsb/jdbc-binding/lib/; fi"
-  config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files ]; then cp -r /vagrant/files ~/; fi"
-  config.vm.provision "shell", privileged: false,  inline: "if [ -d ~/files ]; then chmod +x -f ~/files/*.sh; exit 0; fi"
-  config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files/workloads ]; then mv ~/files/workloads ~/; fi"
-  config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files/libs ]; then mv ~/files/libs ~/; fi"
+  config.vm.provision "shell", privileged: false,  inline: "if [ \\( -f /vagrant/files/ycsb.tar.gz -a -r /vagrant/files/ycsb.tar.gz \\) -o \\( -f /vagrant/files/ycsb-0.4.0.tar.gz -a -r /vagrant/files/ycsb-0.4.0.tar.gz \\) ]; then if [ -f /vagrant/files/ycsb-0.4.0.tar.gz ]; then mv /vagrant/files/ycsb-0.4.0.tar.gz /home/vagrant/ycsb.tar.gz; else mv /vagrant/files/ycsb.tar.gz /home/vagrant/ycsb.tar.gz; fi; else wget -O /home/vagrant/ycsb.tar.gz -t 10 --retry-connrefused -nv \"#{$links_ycsbts}\" ; fi"
+  config.vm.provision "shell", privileged: false,  inline: "tar -C /home/vagrant/ -xvzf /home/vagrant/ycsb.tar.gz"
+  config.vm.provision "shell", privileged: false,  inline: "rm /home/vagrant/ycsb.tar.gz"
+  config.vm.provision "shell", privileged: false,  inline: "mv /home/vagrant/ycsb-0.4.0 /home/vagrant/ycsb"  
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d /home/vagrant/ycsb/jdbc-binding/lib/ ]; then ln -s /usr/share/java/mysql-connector-java.jar /home/vagrant/ycsb/jdbc-binding/lib/; fi"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d /home/vagrant/ycsb/jdbc-binding/lib/ ]; then ln -s /usr/share/java/postgresql-jdbc4.jar /home/vagrant/ycsb/jdbc-binding/lib/; fi"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files ]; then cp -r /vagrant/files /home/vagrant/; fi"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d /home/vagrant/files ]; then chmod +x -f /home/vagrant/files/*.sh; exit 0; fi"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files/workloads ]; then mv /home/vagrant/files/workloads /home/vagrant/; fi"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files/libs ]; then mv /home/vagrant/files/libs /home/vagrant/; fi"
 
 end

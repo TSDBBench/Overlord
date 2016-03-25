@@ -9,6 +9,7 @@ HOSTNAME = "vm1"
 
 load 'vagrantconf.rb'
 load 'vagrantconf_db.rb'
+load 'basic/provider_specific.rb'
 load 'basic/change_hostname.rb'
 load 'basic/update.rb'
 load 'basic/druid.rb'

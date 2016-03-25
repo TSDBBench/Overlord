@@ -9,9 +9,11 @@ HOSTNAME = "vm0"
 
 load 'vagrantconf.rb'
 load 'vagrantconf_db.rb'
+load 'basic/provider_specific.rb'
 load 'basic/change_hostname.rb'
 load 'basic/update.rb'
 load 'basic/mysql.rb'
+load 'basic/libmysql.rb'
 load 'basic/druid_mysql.rb'
 load 'basic/zookeeper.rb'
 load 'basic/druid.rb'

@@ -2,7 +2,7 @@
 Description=Blueflood
 
 [Service]
-ExecStart=/usr/bin/java -cp /home/vagrant/blueflood-all-2.0.0-SNAPSHOT-jar-with-dependencies.jar \
+ExecStart=/usr/bin/java -cp /home/vagrant/blueflood.jar \
 -Dblueflood.config=file:///home/vagrant/blueflood.conf \
 -Dlog4j.configuration=file:///home/vagrant/blueflood-log4j.properties \
 -Xms4G \
