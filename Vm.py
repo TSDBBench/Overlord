@@ -99,36 +99,41 @@ class Vm():
         pathBasicFileFolderNew=os.path.join(pathTmp,self.basicFilesFolder)
         if not Util.copy_folders(basicFileFoldersOld,pathBasicFileFolderNew,self.logger, True):
                 return False
-        if self.provider == "digital_ocean":
-            # digital ocean needs a random name, otherwise we always get problems with multiple measurements
-            if Util.check_file_exists(pathVagrantFileNew):
-                self.logger.error("'%s' does already exist." %(pathVagrantFileNew))
-                return False
-            try:
-                file_old = open(pathVagrantFileOld, "r")
-                file_new = open(pathVagrantFileNew, "w")
-                for line in file_old:
-                    if re.match(r'^\s*HOSTNAME\s+=\s+("[^"]+"|\'[^\']+\')\s*$',line) != None:
-                        split_res = re.search(r'("[^"]+"|\'[^\']+\')',line)
-                        if split_res != None:
+        # digital ocean needs a random name, otherwise we always get problems with multiple measurements
+        if Util.check_file_exists(pathVagrantFileNew):
+            self.logger.error("'%s' does already exist." %(pathVagrantFileNew))
+            return False
+        try:
+            file_old = open(pathVagrantFileOld, "r")
+            file_new = open(pathVagrantFileNew, "w")
+            for line in file_old:
+                if re.match(r'^\s*HOSTNAME\s+=\s+("[^"]+"|\'[^\']+\')\s*$',line) != None:
+                    split_res = re.search(r'("[^"]+"|\'[^\']+\')',line)
+                    if split_res != None:
+                        if self.provider == "digital_ocean":
                             # allowed are numbers, letters, hyphens and dots
+                            random_string = Util.get_random_string(10)
                             file_new.write("HOSTNAME = \"%s-%s\"\n" %(split_res.group()[1:-1],
-                                                                      Util.get_random_string(10)))
+                                                                      random_string))
+                            self.name =  "%s-%s" % (split_res.group()[1:-1], random_string)
                         else:
-                            self.logger.warning("Could not parse hostname out of '%s'. "
-                                                "Using the default. Errors can occur." % (line))
+                            self.name = "%s" % (split_res.group()[1:-1])
                             file_new.write(line)
                     else:
+                        self.logger.warning("Could not parse hostname out of '%s'. "
+                                            "Using the default. Errors can occur." % (line))
                         file_new.write(line)
-                file_new.flush()
-                file_new.close()
-                file_old.close()
-            except Exception,e:
-                self.logger.error("An error occured while copying '%s' to '%s'." % (pathVagrantFileOld,
-                                                                                    pathVagrantFileNew), exc_info=True)
-        else:
-            if not Util.copy_file(pathVagrantFileOld,pathVagrantFileNew,self.logger):
-                return False
+                else:
+                    file_new.write(line)
+            file_new.flush()
+            file_new.close()
+            file_old.close()
+        except Exception,e:
+            self.logger.error("An error occured while copying '%s' to '%s'." % (pathVagrantFileOld,
+                                                                                pathVagrantFileNew), exc_info=True)
+        # else:
+        #     if not Util.copy_file(pathVagrantFileOld,pathVagrantFileNew,self.logger):
+        #         return False
         self.pathVagrantfile=pathVagrantFileNew
         Util.clear_vagrant_files(pathTmp,self.logger)
         # Create VM
@@ -187,4 +192,12 @@ class Vm():
             return result.stdout
         else:
             self.logger.error("Can't get IP on %s, command returned %s." %(self.vm.user_hostname_port(), result.return_code))
+            return None
+
+    def get_hostname(self):
+        result = self.run_with_output (True,'hostname',True, True)
+        if result.return_code == 0:
+            return result.stdout
+        else:
+            self.logger.error("Can't get hostname on %s, command returned %s." %(self.vm.user_hostname_port(), result.return_code))
             return None

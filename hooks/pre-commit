@@ -8,13 +8,23 @@
 # To enable this hook, rename this file to "pre-commit".
 
 echo "Copying Files to vagrant_files/generator/..."
-cp RunWorkload.py vagrant_files/generator/files/RunWorkload.py
-if [ $? -ne 0 ]; then
-    echo "Error: 'cp RunWorkload.py vagrant_files/generator/files/RunWorkload.py' did not return 0"
+if [ -d vagrant_files/generator/files/databases/ ]; then
+    rm -r vagrant_files/generator/files/databases/
+    if [ $? -ne 0 ]; then
+        echo "Error: 'rm -r vagrant_files/generator/files/' did not return 0"
+    fi
 fi
 cp -r databases vagrant_files/generator/files/
 if [ $? -ne 0 ]; then
     echo "Error: 'cp -r databases vagrant_files/generator/files/' did not return 0"
+fi
+cp RunWorkload.py vagrant_files/generator/files/RunWorkload.py
+if [ $? -ne 0 ]; then
+    echo "Error: 'cp RunWorkload.py vagrant_files/generator/files/RunWorkload.py' did not return 0"
+fi
+git add vagrant_files/generator/files/
+if [ $? -ne 0 ]; then
+    echo "Error: 'git add vagrant_files/generator/files/' did not return 0"
 fi
 git commit --no-verify vagrant_files/generator/files/RunWorkload.py databases vagrant_files/generator/files/*
 exit 0

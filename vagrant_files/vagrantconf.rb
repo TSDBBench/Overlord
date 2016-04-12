@@ -3,17 +3,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box_url = 'dummy.box'
   config.ssh.username = 'vagrant'
   
-  config.vm.provider :vsphere do |vsphere|
-    vsphere.host = ''          
-    vsphere.compute_resource_name = ''            
+  config.vm.provider :vsphere do |vsphere, override|
+    vsphere.host = ''
+    vsphere.compute_resource_name = ''
     vsphere.resource_pool_name = ''
-    vm_base_path = ''     
+    vm_base_path = ''
     vsphere.data_store_name = ''
-    vsphere.user = ''                                    
-    vsphere.password = ''                            
-    vsphere.insecure = true                                    
+    vsphere.user = ''
+    vsphere.password = ''
+    vsphere.insecure = true
   end
-  config.vm.provider :openstack do |openstack|
+  config.vm.provider :openstack do |openstack, override|
     openstack.openstack_auth_url = ''
     openstack.username           = ''
     openstack.password           = ''
@@ -22,10 +22,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     openstack.floating_ip_pool   = ''
     openstack.openstack_image_url = ''
   end
-  config.vm.provider :virtualbox do |virtualbox|
-    config.vm.box                = "tsdbbench-debian"
+  config.vm.provider :virtualbox do |virtualbox, override|
+    override.vm.box                = "tsdbbench-debian"
     virtualbox.gui                 = false
-    config.vm.network "private_network", type: "dhcp"
+    override.vm.network "private_network", type: "dhcp"
   end
   config.vm.provider :digital_ocean do |digitalocean, override|
     # See https://github.com/devopsgroup-io/vagrant-digitalocean for configuration details
@@ -48,4 +48,9 @@ $git_h5json = 'c31bfb7ff2da864a737ce9464ba1895b0d5af8f4'
 $git_h5serv = '18709351fb173697e323eb62828cb8868f2e1db3'
 
 # hbase
-$links_hbase = 'http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist/hbase/1.1.3/hbase-1.1.3-bin.tar.gz'
+$links_hbase = 'http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist/hbase/1.1.4/hbase-1.1.4-bin.tar.gz'
+
+# influxdb
+# influxdb 0.12. and upwards does not support clustering anymore, see https://influxdata.com/blog/update-on-influxdb-clustering-high-availability-and-monetization/
+# It uses relay instead for high availability (clustering only in enterprise version)
+$links_influxdb = 'https://s3.amazonaws.com/influxdb/influxdb_0.11.1-1_amd64.deb'

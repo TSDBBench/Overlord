@@ -26,11 +26,16 @@ __version__ = "0.01"
 # check_dict -> list of commands to run after prerun for each db vm (key=number of vm) (without ycsb, sync or space diff or poweroff commands!) (%%SSH%% not needed)
 # basic -> True/False, if True this is a basic database, so no need to ssh for space checking
 # sequence -> which vm should be provisioned first? (for all postrun/prerun dicts/lists. First number is considered master db vm, rest are slaves.)
+# include -> which base modules should be imported and added to the dictionary (standard functions that are reusable). Warning: infinite import loop possible!
 # the following variables are possible in prerun_once, postrun_once, prerun, prerun_master, prerun_slaves, check, check_master, check_slaves, postrun, postrun_master, postrun_slaves, prerun_dict, postrun_dict, check_dict, db_args:
 # %%IP%% -> IP of (actual) db vm
 # %%IPgen%% -> IP of (actual) generator vm (on which this script runs)
 # %%IPn%% -> IP of db vm number n (e.g. %%IP2%%)
 # %%IPall%% -> give String with IP of all vms)
+# %%HN%% -> Hostname of (actual) db vm
+# %%HNgen%% -> Hostname of (actual) generator vm (on which this script runs)
+# %%HNn%% -> Hostname of db vm number n (e.g. %%HN2%%)
+# %%HNall%% -> give String with Hostname of all vms)
 # %%SSH%% -> if SSH should be used (set at the beginning)
 # Order of Preruns/Postruns:
 # 1. prerun/postrun/check, 2. prerun_master/postrun_master/check_master, 3. preun_skaves/postrun_slaves/check_slaves, 4.prerun_dict/postrun_dict/check_dict
@@ -69,4 +74,5 @@ def getDict():
     dbConfig["check_dict"]= {}
     dbConfig["basic"]= False
     dbConfig["sequence"]=[0,1,2,3,4]
+    dbConfig["include"] = []
     return dbConfig

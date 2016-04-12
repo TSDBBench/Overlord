@@ -17,15 +17,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
    #config.vm.provision "shell", inline: "pip install tornado"
    config.vm.provision "shell", privileged: false,  inline: "cd /home/vagrant/ && git clone https://github.com/HDFGroup/hdf5-json.git"
    config.vm.provision "shell", privileged: false,  inline: "cd /home/vagrant/hdf5-json && git checkout \"#{$git_h5json}\""
+   config.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/hdf5-json" # required for digital_ocean
    config.vm.provision "shell", inline: "cd /home/vagrant/hdf5-json && env CPPFLAGS='-I/usr/lib/x86_64-linux-gnu/hdf5/serial/include/' LDFLAGS='-L/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/' HDF5_DIR='/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/' python setup.py install"
    config.vm.provision "shell", inline: "cd /home/vagrant/hdf5-json && python testall.py --unit"  
    config.vm.provision "shell", privileged: false,  inline: "cd /home/vagrant/ && git clone https://github.com/HDFGroup/h5serv.git"
    config.vm.provision "shell", privileged: false,  inline: "cd /home/vagrant/h5serv && git checkout \"#{$git_h5serv}\""
+   config.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/h5serv" # required for digital_ocean
    config.vm.provision "shell", inline: "cp /vagrant/files/h5serv.service /etc/systemd/system"
    config.vm.provision "shell", inline: "chown root:root /etc/systemd/system/h5serv.service"
    config.vm.provision "shell", inline: "systemctl daemon-reload"
    config.vm.provision "shell", inline: "systemctl start h5serv.service"  
-   config.vm.provision "shell", privileged: false, inline: "cd /home/vagrant/h5serv && python test/testall.py"  
+   config.vm.provision "shell", privileged: false, inline: "cd /home/vagrant/h5serv && sudo -u vagrant -s python test/testall.py"  # sudo -u required for digital_ocean
    config.vm.provision "shell", inline: "systemctl stop h5serv.service"  
    config.vm.provision "shell", inline: "rm -r /home/vagrant/h5serv/data/*"  
    config.vm.provision "shell", inline: "sed -i \"s/'debug':  True/'debug':  False/g\" /home/vagrant/h5serv/server/config.py"

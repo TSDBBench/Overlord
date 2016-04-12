@@ -14,17 +14,9 @@ load 'basic/change_hostname.rb'
 load 'basic/update.rb'
 load 'basic/zookeeper.rb'
 load 'basic/hadoop.rb'
-load 'basic/hadoop_cluster.rb'
-load 'basic/hadoop_master.rb'
 load 'basic/hbase.rb'
-load 'basic/hbase_cluster.rb'
 load 'basic/hbase_cluster_repl5.rb'
 load 'basic/hbase_lzo_copy.rb'
 load 'basic/opentsdb.rb'
-load 'basic/opentsdb_cluster.rb'
 load 'basic/copy_files.rb'
-
-  #config.vm.provision "shell", inline: "JAVA_HOME=$(readlink -f /usr/bin/java | sed \"s:bin/java::\") /home/vagrant/hbase-1.1.2/bin/start-hbase.sh"
-  #config.vm.provision "shell", inline: "JAVA_HOME=$(readlink -f /usr/bin/java | sed \"s:bin/java::\") COMPRESSION=NONE HBASE_HOME=/home/vagrant/hbase-1.1.2 /usr/share/opentsdb/tools/create_table.sh"
-  #config.vm.provision "shell", inline: "systemctl start opentsdb.service"
-  #config.vm.provision "shell", inline: "/usr/share/opentsdb/bin/tsdb mkmetric usermetric"
+load 'basic/provider_specific_end.rb'

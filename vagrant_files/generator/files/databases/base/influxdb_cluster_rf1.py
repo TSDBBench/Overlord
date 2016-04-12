@@ -5,11 +5,6 @@ __author__ = 'Andreas Bader'
 __version__ = "0.01"
 
 # db_folders -> List of DB Folder (for space check)
-# db_client -> name of ycsb client
-# db_args -> special ycsb arguments for this db
-# db_name -> name of this db (e.g. for workload file)
-# db_desc -> more detailed name/description
-# jvm_args -> special jvm_args for this db and ycsb
 # prerun_once -> list of commands to run local once before ycsb (%%IP%% uses first db vm) (without ycsb, sync or space diff or poweroff commands!)
 # postrun_once -> list of commands to run local once after ycsb (%%IP%% uses first db vm) (without ycsb, sync or space diff or poweroff commands!)
 # prerun -> list of commands to run before ycsb (all vms or local) (without ycsb, sync or space diff or poweroff commands!)
@@ -24,44 +19,44 @@ __version__ = "0.01"
 # check_master -> list of commands to run after prerun (all vms or local) for checking if everything runs correctly (only on master(first=ID 0) vm or local))
 # check_slaves -> list of commands to run after prerun (all vms or local) for checking if everything runs correctly (all without master(=ID 0)) vms or local))
 # check_dict -> list of commands to run after prerun for each db vm (key=number of vm) (without ycsb, sync or space diff or poweroff commands!) (%%SSH%% not needed)
-# basic -> True/False, if True this is a basic database, so no need to ssh for space checking
-# sequence -> which vm should be provisioned first? (for all postrun/prerun dicts/lists. First number is considered master db vm, rest are slaves.)
+# include -> which base modules should be imported and added to the dictionary (standard functions that are reusable). Warning: infinite import loop possible!
 # the following variables are possible in prerun_once, postrun_once, prerun, prerun_master, prerun_slaves, check, check_master, check_slaves, postrun, postrun_master, postrun_slaves, prerun_dict, postrun_dict, check_dict, db_args:
 # %%IP%% -> IP of (actual) db vm
 # %%IPgen%% -> IP of (actual) generator vm (on which this script runs)
 # %%IPn%% -> IP of db vm number n (e.g. %%IP2%%)
 # %%IPall%% -> give String with IP of all vms)
+# %%HN%% -> Hostname of (actual) db vm
+# %%HNgen%% -> Hostname of (actual) generator vm (on which this script runs)
+# %%HNn%% -> Hostname of db vm number n (e.g. %%HN2%%)
+# %%HNall%% -> give String with Hostname of all vms)
 # %%SSH%% -> if SSH should be used (set at the beginning)
 # Order of Preruns/Postruns:
 # 1. prerun/postrun/check, 2. prerun_master/postrun_master/check_master, 3. preun_skaves/postrun_slaves/check_slaves, 4.prerun_dict/postrun_dict/check_dict
 # General Order:
 #  prerun -> check -> ycsb -> postrun
 
+# this configures a influxdb cluster with replication factor 1
+
 def getDict():
-    dbConfig={}
-    dbConfig["db_folders"]=["/var/lib/mysql"]
-    dbConfig["db_client"]="jdbc"
-    dbConfig["db_args"]="-p jdbc.driver=com.mysql.jdbc.Driver -p db.url=jdbc:mysql://%%IP%%:3306/test -p db.user=root -p db.passwd=vagrant"
-    dbConfig["db_name"]="mysql1"
-    dbConfig["db_desc"]="MySQL DB on 1 VM."
-    dbConfig["jvm_args"]="-jvm-args='-Xmx4096m'"
-    dbConfig["prerun_once"]= []
-    dbConfig["postrun_once"]= []
-    dbConfig["prerun"]= [
-        "mysql -h \"%%IP%%\" -u root --password='vagrant' -e 'create database test'",
-        "%%SSH%%mysql -u root --password='vagrant' -e 'source /home/vagrant/files/create_table.mysql'"
-        ]
-    dbConfig["postrun"]= []
-    dbConfig["prerun_master"]= []
-    dbConfig["postrun_master"]= []
-    dbConfig["prerun_slaves"]= []
-    dbConfig["postrun_slaves"]= []
-    dbConfig["prerun_dict"]= {}
-    dbConfig["postrun_dict"]= {}
-    dbConfig["check"]= []
-    dbConfig["check_master"]= []
-    dbConfig["check_slaves"]= []
-    dbConfig["check_dict"]= {}
-    dbConfig["basic"]= False
-    dbConfig["sequence"]=[0]
-    return dbConfig
+    baseConfig={}
+    baseConfig["db_folders"]=[]
+    baseConfig["prerun_once"]= []
+    baseConfig["postrun_once"]= []
+    baseConfig["prerun"] = []
+    baseConfig["postrun"]= []
+    baseConfig["prerun_master"]= []
+    baseConfig["postrun_master"]= []
+    baseConfig["prerun_slaves"]= []
+    baseConfig["postrun_slaves"]= []
+    baseConfig["prerun_dict"]= {
+        4: [
+            "%%SSH%%sudo -s bash -c 'exit $(curl -G http://%%HN0%%:8086/query --data-urlencode \"q=ALTER RETENTION POLICY default ON testdb DURATION INF REPLICATION 1\" 2>&1 | grep -c -i -E \"error|failed\")'"
+        ],
+    }
+    baseConfig["postrun_dict"]= {}
+    baseConfig["check"]= []
+    baseConfig["check_master"]= []
+    baseConfig["check_slaves"]= []
+    baseConfig["check_dict"]= {}
+    baseConfig["include"] = []
+    return baseConfig

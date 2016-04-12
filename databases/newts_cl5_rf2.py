@@ -26,6 +26,7 @@ __version__ = "0.01"
 # check_dict -> list of commands to run after prerun for each db vm (key=number of vm) (without ycsb, sync or space diff or poweroff commands!) (%%SSH%% not needed)
 # basic -> True/False, if True this is a basic database, so no need to ssh for space checking
 # sequence -> which vm should be provisioned first? (for all postrun/prerun dicts/lists. First number is considered master db vm, rest are slaves.)
+# include -> which base modules should be imported and added to the dictionary (standard functions that are reusable). Warning: infinite import loop possible!
 # the following variables are possible in prerun_once, postrun_once, prerun, prerun_master, prerun_slaves, check, check_master, check_slaves, postrun, postrun_master, postrun_slaves, prerun_dict, postrun_dict, check_dict, db_args:
 # %%IP%% -> IP of (actual) db vm
 # %%IPgen%% -> IP of (actual) generator vm (on which this script runs)
@@ -51,12 +52,12 @@ def getDict():
                          "%%SSH%%sudo -s bash -c 'sed -i \"s|listen_address: localhost|listen_address: %%IP%%|g\" /etc/cassandra/cassandra.yaml'",
                          "%%SSH%%sudo -s bash -c 'sed -i \"s|rpc_address: localhost|rpc_address: %%IP%%|g\" /etc/cassandra/cassandra.yaml'"]
     dbConfig["postrun"]= []
-    dbConfig["prerun_master"]= ["%%SSH%%sudo -s bash -c 'sed -i \"s|host: localhost|host: %%IP0%%|g\" /home/vagrant/newts-1.3.1/etc/config.yaml'",
+    dbConfig["prerun_master"]= ["%%SSH%%sudo -s bash -c 'sed -i \"s|host: localhost|host: %%IP0%%|g\" /home/vagrant/newts/etc/config.yaml'",
                                 "%%SSH%%sudo -s bash -c 'systemctl start cassandra.service'",
                                 "%%SSH%%sudo -s bash -c 'sleep 60'",
                                 "%%SSH%%sudo -s bash -c 'cassandra-cli -h %%IP%% -f /home/vagrant/files/newts_cassandra.cli'",
                                 "%%SSH%%sudo -s bash -c 'sleep 5'",
-                                "%%SSH%%sudo -s bash -c '/home/vagrant/newts-1.3.1/bin/init /home/vagrant/newts-1.3.1/etc/config.yaml'",
+                                "%%SSH%%sudo -s bash -c '/home/vagrant/newts/bin/init /home/vagrant/newts/etc/config.yaml'",
                                 "%%SSH%%sudo -s bash -c 'systemctl start newts.service'",
                                 "%%SSH%%sudo -s bash -c 'sleep 5'"]
     dbConfig["postrun_master"]= []
@@ -77,4 +78,5 @@ def getDict():
     dbConfig["check_dict"]= {}
     dbConfig["basic"]= False
     dbConfig["sequence"]=[0,1,2,3,4]
+    dbConfig["include"] = []
     return dbConfig

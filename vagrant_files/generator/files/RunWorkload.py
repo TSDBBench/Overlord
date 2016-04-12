@@ -59,6 +59,18 @@ def get_local_ip(logger):
             logger.error("Can't get local IP.")
         return None
 
+def get_local_hostname(logger):
+    result = run_local('hostname', logger, False, True)
+    if result != None and result != False and result.return_code == 0:
+        return result.stdout
+    else:
+        if result != None and result != False:
+            logger.error(
+                "Can't get local Hostname. Return Code: '%s' STDOUT: '%s'." % (result.return_code, result.stdout))
+        else:
+            logger.error("Can't get local Hostname.")
+        return None
+
 def check_keys(dict, keys):
     foundAll = True
     for key in keys:
@@ -171,32 +183,41 @@ def remote_sync(ips):
 def local_sync():
     run_local("sudo sync",logger,False)
 
-def replStr(ips, ip, str, localIp):
+def replStrIp(ips, ip, str, localIp):
+    return replStr(ips, ip, str, localIp, "IP", ips)
+
+def replStrHn(hostnames, hostname, str, localHn, ips):
+    return replStr(hostnames, hostname, str, localHn, "HN", ips)
+
+
+def replStr(strings, string, str, local_string, baseStr, ips):
     commandRepl=str
-    commandRepl=commandRepl.replace("%%IP%%",ip);
-    commandRepl=commandRepl.replace("%%IPgen%%",localIp);
+    commandRepl=commandRepl.replace("%%%%%s%%%%" % (baseStr), string);
+    commandRepl=commandRepl.replace("%%%%%sgen%%%%" % (baseStr), local_string);
     ipAll=""
-    for ipAddr in ips:
-        ipAll+="%s " %(ip)
+    for ipAddr in strings:
+        ipAll+="%s " %(string)
     ipAll="\"%s\"" %(ipAll[:-1])
-    commandRepl=commandRepl.replace("%%IPall%%",ipAll);
-    findallRes = re.findall("%%IP[0-9]+%%", commandRepl)
+    commandRepl=commandRepl.replace("%%%%%sall%%%%" % (baseStr) ,ipAll);
+    findallRes = re.findall("%%%%%s[0-9]+%%%%" % (baseStr), commandRepl)
     for res in findallRes:
         searchRes = re.search("[0-9]+", res)
         if searchRes != None:
             try:
                 key = int(searchRes.group(0))
-                if len(ips) > key:
-                    commandRepl=commandRepl.replace(res,ips[key]);
+                if len(strings) > key:
+                    commandRepl=commandRepl.replace(res, strings[key]);
                 else:
                     logger.error('Key to high, not enough ips for key %s.' %(key))
-                    clean_exit(-1,  ips, not args.noshutdown)
+                    logger.error(commandRepl)
+                    logger.error(baseStr)
+                    clean_exit(-1, ips, not args.noshutdown)
             except:
                 logger.error("Can't convert key to int: %s." %(key))
-                clean_exit(-1,  ips, not args.noshutdown)
+                clean_exit(-1, ips, not args.noshutdown)
         else:
             logger.error('Failed to find number in %s.' %(res))
-            clean_exit(-1,  ips, not args.noshutdown)
+            clean_exit(-1, ips, not args.noshutdown)
     return commandRepl
 
 # Configure ArgumentParser
@@ -204,6 +225,7 @@ parser = argparse.ArgumentParser(prog="RunWorkload.py",version=__version__,descr
 parser.add_argument("-d", "--database",  metavar="DATABASE", required=True, help="Process database DATABASE")
 parser.add_argument("-w", "--workload",  metavar="WORKLOAD", required=True, help="Process workload WORKLOAD")
 parser.add_argument("-i", "--ip", metavar="IP", required=True, nargs='+', help="connect to IP; Can be more than one.")
+parser.add_argument("-s", "--hostname", required=True, metavar="HOSTNAMES", nargs='+', help="Hostnames of the nodes, same order as IPs. Can be more than one.")
 parser.add_argument("-g", "--granularity", metavar="GRANULARITY", type=int, default=1000, help="use TS Granularity")
 parser.add_argument("-b", "--bucket", metavar="BUCKET", type=int, default=10000, help="set Bucketsize for histogram measurements")
 parser.add_argument("-t", "--timeseries", action='store_true', help="do timeseries instead of histogramm")
@@ -259,11 +281,16 @@ if dbConfig == None or dbConfig == {}:
 # check_dict -> list of commands to run after prerun for each db vm (key=number of vm) (without ycsb, sync or space diff or poweroff commands!) (%%SSH%% not needed)
 # basic -> True/False, if True this is a basic database, so no need to ssh for space checking
 # sequence -> which vm should be provisioned first? (for all postrun/prerun dicts/lists. First number is considered master db vm, rest are slaves.)
+# include -> which base modules should be imported and added to the dictionary (standard functions that are reusable). Warning: infinite import loop possible!
 # the following variables are possible in prerun_once, postrun_once, prerun, prerun_master, prerun_slaves, check, check_master, check_slaves, postrun, postrun_master, postrun_slaves, prerun_dict, postrun_dict, check_dict, db_args:
 # %%IP%% -> IP of (actual) db vm
 # %%IPgen%% -> IP of (actual) generator vm (on which this script runs)
 # %%IPn%% -> IP of db vm number n (e.g. %%IP2%%)
 # %%IPall%% -> give String with IP of all vms)
+# %%HN%% -> Hostname of (actual) db vm
+# %%HNgen%% -> Hostname of (actual) generator vm (on which this script runs)
+# %%HNn%% -> Hostname of db vm number n (e.g. %%HN2%%)
+# %%HNall%% -> give String with Hostname of all vms)
 # %%SSH%% -> if SSH should be used (set at the beginning)
 # Order of Preruns/Postruns:
 # 1. prerun/postrun/check, 2. prerun_master/postrun_master/check_master, 3. preun_skaves/postrun_slaves/check_slaves, 4.prerun_dict/postrun_dict/check_dict
@@ -274,17 +301,23 @@ knownKeys=["db_folders","db_client","db_args","db_name","db_desc","jvm_args","pr
 
 if args.database.lower() in dbConfig.keys():
     localIp = get_local_ip(logger)
+    localHn = get_local_hostname(logger)
     if localIp == None:
         logger.error("Can't get local IP, abort.")
         clean_exit(-1,args.ip, not args.noshutdown)
     # Sort ips once and for all
-    ips=[]
+    ips = []
+    hostnames = {} # keys = ips
     if len(dbConfig[args.database.lower()]["sequence"]) != len(args.ip):
         logger.error("Sequence list has not the same length as IP list. That can not work!")
         clean_exit(-1,args.ip, not args.noshutdown)
+    if len(args.hostname) != len(args.ip):
+        logger.error("Hostname list has not the same length as IP list. That can not work!")
+        clean_exit(-1, args.ip, not args.noshutdown)
     for ipIdx in dbConfig[args.database.lower()]["sequence"]:
         # do not sort here! this would only sort ips/hostnames alphanumerically. they must be come in sorted and then use the given sequence
         ips.append(args.ip[ipIdx])
+        hostnames[args.ip[ipIdx]] = args.hostname[ipIdx]
     if not check_keys(dbConfig[args.database.lower()], knownKeys):
         logger.error("Some keys are missing for %s" %(args.database.lower()))
         clean_exit(-1,ips, not args.noshutdown)
@@ -292,7 +325,8 @@ if args.database.lower() in dbConfig.keys():
     # Prerun once
     for command in dbConfig[args.database.lower()]["prerun_once"]:
         commandRepl = command
-        commandRepl = replStr(args.ip, ips[0],commandRepl, localIp)
+        commandRepl = replStrIp(args.ip, ips[0], commandRepl, localIp)
+        commandRepl = replStrHn(args.hostname, hostnames[ips[0]], commandRepl, localHn, args.ip)
         if "%%SSH%%" in commandRepl:
             commandRepl = commandRepl.replace("%%SSH%%","")
         run_local (commandRepl,logger, False)
@@ -300,7 +334,8 @@ if args.database.lower() in dbConfig.keys():
     for command in dbConfig[args.database.lower()]["prerun"]:
         for ip in ips:
             commandRepl = command
-            commandRepl = replStr(args.ip, ip ,commandRepl, localIp)
+            commandRepl = replStrIp(args.ip, ip, commandRepl, localIp)
+            commandRepl = replStrHn(args.hostname, hostnames[ip], commandRepl, localHn, args.ip)
             if "%%SSH%%" in commandRepl:
                 commandRepl = commandRepl.replace("%%SSH%%","")
                 run_on_vm (ip, "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -309,7 +344,8 @@ if args.database.lower() in dbConfig.keys():
     # Prerun for master (first) vm
     for command in dbConfig[args.database.lower()]["prerun_master"]:
         commandRepl = command
-        commandRepl = replStr(args.ip, args.ip[0],commandRepl, localIp)
+        commandRepl = replStrIp(args.ip, args.ip[0], commandRepl, localIp)
+        commandRepl = replStrHn(args.hostname, hostnames[args.ip[0]], commandRepl, localHn, args.ip)
         if "%%SSH%%" in commandRepl:
             commandRepl = commandRepl.replace("%%SSH%%","")
             run_on_vm (args.ip[0], "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -322,7 +358,8 @@ if args.database.lower() in dbConfig.keys():
         if len(ipsWithoutMaster) > 0:
             for ip in ipsWithoutMaster:
                 commandRepl = command
-                commandRepl = replStr(args.ip, ip,commandRepl, localIp)
+                commandRepl = replStrIp(args.ip, ip, commandRepl, localIp)
+                commandRepl = replStrHn(args.hostname, hostnames[ip], commandRepl, localHn, args.ip)
                 if "%%SSH%%" in commandRepl:
                     commandRepl = commandRepl.replace("%%SSH%%","")
                     run_on_vm (ip, "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -336,7 +373,8 @@ if args.database.lower() in dbConfig.keys():
             if len(args.ip) > key:
                for command in dbConfig[args.database.lower()]["prerun_dict"][key]:
                     commandRepl = command
-                    commandRepl = replStr(args.ip, args.ip[key],commandRepl, localIp)
+                    commandRepl = replStrIp(args.ip, args.ip[key], commandRepl, localIp)
+                    commandRepl = replStrHn(args.hostname, hostnames[args.ip[key]], commandRepl, localHn, args.ip)
                     if "%%SSH%%" in commandRepl:
                         commandRepl = commandRepl.replace("%%SSH%%","")
                     run_on_vm (args.ip[key], "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -346,7 +384,8 @@ if args.database.lower() in dbConfig.keys():
     for command in dbConfig[args.database.lower()]["check"]:
         for ip in ips:
             commandRepl = command
-            commandRepl = replStr(args.ip, ip ,commandRepl, localIp)
+            commandRepl = replStrIp(args.ip, ip, commandRepl, localIp)
+            commandRepl = replStrHn(args.hostname, hostnames[ip], commandRepl, localHn, args.ip)
             if "%%SSH%%" in commandRepl:
                 commandRepl = commandRepl.replace("%%SSH%%","")
                 run_on_vm (ip, "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -355,7 +394,8 @@ if args.database.lower() in dbConfig.keys():
     # Check for master (first) vm
     for command in dbConfig[args.database.lower()]["check_master"]:
         commandRepl = command
-        commandRepl = replStr(args.ip, args.ip[0],commandRepl, localIp)
+        commandRepl = replStrIp(args.ip, args.ip[0], commandRepl, localIp)
+        commandRepl = replStrHn(args.hostname, hostnames[args.ip[0]], commandRepl, localHn, args.ip)
         if "%%SSH%%" in commandRepl:
             commandRepl = commandRepl.replace("%%SSH%%","")
             run_on_vm (args.ip[0], "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -368,7 +408,8 @@ if args.database.lower() in dbConfig.keys():
         if len(ipsWithoutMaster) > 0:
             for ip in ipsWithoutMaster:
                 commandRepl = command
-                commandRepl = replStr(args.ip, ip,commandRepl, localIp)
+                commandRepl = replStrIp(args.ip, ip, commandRepl, localIp)
+                commandRepl = replStrHn(args.hostname, hostnames[ip], commandRepl, localHn, args.ip)
                 if "%%SSH%%" in commandRepl:
                     commandRepl = commandRepl.replace("%%SSH%%","")
                     run_on_vm (ip, "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -382,7 +423,8 @@ if args.database.lower() in dbConfig.keys():
             if len(args.ip) > key:
                for command in dbConfig[args.database.lower()]["check_dict"][key]:
                     commandRepl = command
-                    commandRepl = replStr(args.ip, args.ip[key],commandRepl, localIp)
+                    commandRepl = replStrIp(args.ip, args.ip[key], commandRepl, localIp)
+                    commandRepl = replStrHn(args.hostname, hostnames[args.ip[key]], commandRepl, localHn, args.ip)
                     if "%%SSH%%" in commandRepl:
                         commandRepl = commandRepl.replace("%%SSH%%","")
                     run_on_vm (args.ip[key], "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -398,7 +440,7 @@ if args.database.lower() in dbConfig.keys():
     command += " %s" %(dbConfig[args.database.lower()]["db_client"])
     command += " -P ycsb/workloads/%s" %(args.workload)
     if len(args.ip) > 0:
-        command += " %s" %(replStr(args.ip, args.ip[0],dbConfig[args.database.lower()]["db_args"], localIp))
+        command += " %s" %(replStrIp(args.ip, args.ip[0], dbConfig[args.database.lower()]["db_args"], localIp))
     else:
         command += " %s" %(dbConfig[args.database.lower()]["db_args"])
     if args.timeseries:
@@ -435,7 +477,8 @@ if args.database.lower() in dbConfig.keys():
      # Postrun once
     for command in dbConfig[args.database.lower()]["postrun_once"]:
         commandRepl = command
-        commandRepl = replStr(args.ip, ips[0],commandRepl, localIp)
+        commandRepl = replStrIp(args.ip, ips[0], commandRepl, localIp)
+        commandRepl = replStrHn(args.hostname, hostnames[ips[0]], commandRepl, localHn)
         if "%%SSH%%" in commandRepl:
             commandRepl = commandRepl.replace("%%SSH%%","")
         run_local (commandRepl,logger, False)
@@ -443,7 +486,8 @@ if args.database.lower() in dbConfig.keys():
     for command in dbConfig[args.database.lower()]["postrun"]:
         for ip in ips:
             commandRepl = command
-            commandRepl = replStr(args.ip, ip ,commandRepl, localIp)
+            commandRepl = replStrIp(args.ip, ip, commandRepl, localIp)
+            commandRepl = replStrHn(args.hostname, hostnames[ip], commandRepl, localHn)
             if "%%SSH%%" in commandRepl:
                 commandRepl = commandRepl.replace("%%SSH%%","")
                 run_on_vm (ip, "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -452,7 +496,8 @@ if args.database.lower() in dbConfig.keys():
     # Postrun for master (first) vm
     for command in dbConfig[args.database.lower()]["postrun_master"]:
         commandRepl = command
-        commandRepl = replStr(args.ip, args.ip[0],commandRepl, localIp)
+        commandRepl = replStrIp(args.ip, args.ip[0], commandRepl, localIp)
+        commandRepl = replStrHn(args.hostname, hostnames[args.ip[0]], commandRepl, localHn)
         if "%%SSH%%" in commandRepl:
             commandRepl = commandRepl.replace("%%SSH%%","")
             run_on_vm (args.ip[0], "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -465,7 +510,8 @@ if args.database.lower() in dbConfig.keys():
         if len(ipsWithoutMaster) > 0:
             for ip in ipsWithoutMaster:
                 commandRepl = command
-                commandRepl = replStr(args.ip, ip,commandRepl, localIp)
+                commandRepl = replStrIp(args.ip, ip, commandRepl, localIp)
+                commandRepl = replStrHn(args.hostname, hostnames[ip], commandRepl, localHn)
                 if "%%SSH%%" in commandRepl:
                     commandRepl = commandRepl.replace("%%SSH%%","")
                     run_on_vm (ip, "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)
@@ -479,7 +525,8 @@ if args.database.lower() in dbConfig.keys():
             if len(args.ip) > key:
                for command in dbConfig[args.database.lower()]["postrun_dict"][key]:
                     commandRepl = command
-                    commandRepl = replStr(ips, args.ip[key],commandRepl, localIp)
+                    commandRepl = replStrIp(ips, args.ip[key], commandRepl, localIp)
+                    commandRepl = replStrHn(args.hostname, hostnames[args.ip[key]], commandRepl, localHn)
                     if "%%SSH%%" in commandRepl:
                         commandRepl = commandRepl.replace("%%SSH%%","")
                     run_on_vm (args.ip[key], "/home/vagrant/.ssh/id_rsa", True, commandRepl,logger,False,args.debug,False,False)

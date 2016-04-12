@@ -28,56 +28,83 @@ echo "NE5OgEXk2wVfZczCZpigBKbKZHNYcelXtTt/nP3rsCuGcM4h53s=" >> /home/vagrant/.ss
 echo "-----END RSA PRIVATE KEY-----" >> /home/vagrant/.ssh/id_rsa
 SSHSCRIPT
 
+load 'basic/provider_detect.rb'
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-    config.vm.provider :digital_ocean do |digitalocean|
-        config.vm.provision "shell", inline: "sed -i 's|http://http.debian.net/debian|http://ftp.de.debian.org/debian/|g' /etc/apt/sources.list"
-        config.vm.provision "shell", inline: "sed -i 's|main$|main contrib non-free|g' /etc/apt/sources.list"
+    if $provider == "digital_ocean"
+        config.vm.provider :digital_ocean do |digitalocean, override|
+            config.vm.provision "shell", inline: "sed -i 's|http://http.debian.net/debian|http://ftp.de.debian.org/debian/|g' /etc/apt/sources.list"
+            config.vm.provision "shell", inline: "sed -i 's|main$|main contrib non-free|g' /etc/apt/sources.list"
+        end
     end
 end
  
 load 'basic/update.rb'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-    config.vm.hostname = HOSTNAME
-    config.vm.provider :digital_ocean do |digitalocean|
-        # all what is done in preseed files (see preseed-vsphere.cfg for example) must be done here for digitalocean
-        config.vm.provision "shell", inline: "echo 'Defaults env_keep += \"SSH_AUTH_SOCK DEBIAN_FRONTEND\"' >> /etc/sudoers"
-        config.vm.provision "shell", inline: "echo 'export DEBIAN_FRONTEND=noninteractive' >> /home/vagrant/.bashrc"
-        config.vm.provision "shell", inline: "echo 'export DEBIAN_FRONTEND=noninteractive' >> /root/.bashrc"
-        # digital_ocean uses specific ssh keys, add vagrant ones
-        config.vm.provision "shell", inline: "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key' >> /home/vagrant/.ssh/authorized_keys"
-        config.vm.provision "shell", inline: "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key' >> /home/vagrant/.ssh/id_rsa.pub"
-        config.vm.provision "shell", inline: "echo 'Host *' >> /home/vagrant/.ssh/config"
-        config.vm.provision "shell", inline: "echo '   StrictHostKeyChecking no' >> /home/vagrant/.ssh/config"
-        config.vm.provision "shell", inline: "echo '   UserKnownHostsFile=/dev/null' >> /home/vagrant/.ssh/config"
-        config.vm.provision "shell", inline: $sshscript
-        config.vm.provision "shell", inline: "chmod 640 /home/vagrant/.ssh/id_rsa.pub"
-        config.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/id_rsa"
-        config.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh"
-        config.vm.provision "shell", inline: "chmod -R go-rwx /home/vagrant/.ssh/authorized_keys"
-        config.vm.provision "shell", inline: "cp -r /home/vagrant/.ssh /root/"
-        config.vm.provision "shell", inline: "chown -R root:root /root/.ssh/"
-        config.vm.provision "shell", inline: "sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config"
-        # sudo is already there
-        config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y install build-essential ruby-highline ruby-termios ntp linux-headers-amd64 dpkg screen htop wget curl openjdk-7-jre open-vm-tools rsync libpam-systemd python2.7 fabric resolvconf linux-image-amd64 openssh-server"
-        config.vm.provision "shell", inline: "echo 'blacklist ipv6' >> /etc/modprobe.d/blacklist.conf"
-        config.vm.provision "shell", inline: "echo 'fs.file-max = 404358' >> /etc/sysctl.conf"
-        config.vm.provision "shell", inline: "echo 'fs.file-max = 404358' >> /etc/sysctl.d/99-sysctl.conf"
-        config.vm.provision "shell", inline: "sysctl -p /etc/sysctl.conf"
-        config.vm.provision "shell", inline: "sysctl -p /etc/sysctl.d/99-sysctl.conf"
-        config.vm.provision "shell", inline: "echo '* - nofile 404358' >> /etc/security/limits.conf"
-        config.vm.provision "shell", inline: "echo 'root - nofile 404358' >> /etc/security/limits.conf"
-        config.vm.provision "shell", inline: "echo '#!/bin/bash' >> /home/vagrant/change_hostname.sh"; \
-        config.vm.provision "shell", inline: "echo 'get_ip=\$(sudo ifconfig | grep -E -o \"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\" | head -n1)' >> /home/vagrant/change_hostname.sh"
-        config.vm.provision "shell", inline: "echo 'sudo -s bash -c \"echo \\\"\$get_ip \$1\\\" >> /etc/hosts\"' >> /home/vagrant/change_hostname.sh"
-        config.vm.provision "shell", inline: "echo 'sudo -s bash -c \"sudo hostname \$1\"' >> /home/vagrant/change_hostname.sh"
-        config.vm.provision "shell", inline: "echo 'sudo -s bash -c \"echo \\\"\$1\\\" > /etc/hostname\"' >> /home/vagrant/change_hostname.sh"
-        config.vm.provision "shell", inline: "echo 'sudo -s bash -c \"sudo sed -i \\\"s/127.0.1.1.*$//g\\\" /etc/hosts\"' >> /home/vagrant/change_hostname.sh"
-        config.vm.provision "shell", inline: "echo 'sudo hostnamectl set-hostname \$1' >> /home/vagrant/change_hostname.sh"
-        config.vm.provision "shell", inline: "cp /home/vagrant/change_hostname.sh /root/change_hostname.sh"
-        config.vm.provision "shell", inline: "chmod 775 /home/vagrant/change_hostname.sh /root/change_hostname.sh"
-        config.vm.provision "shell", inline: "chown vagrant:vagrant /home/vagrant/change_hostname.sh"
-        config.vm.provision "shell", inline: "chown root:root /root/change_hostname.sh"
-        config.vm.provision "shell", inline: "apt-get clean"
+
+    # Hostname can't be set for vsphere this way, otherwise
+    # boexes randomly hang at "setting hostname..."
+    if $provider == "openstack"
+        config.vm.provider :openstack do |openstack, override|
+            config.vm.hostname = HOSTNAME
+        end
     end
+    
+    if $provider == "virtualbox"
+        config.vm.provider :virtualbox do |virtualbox, override|
+            config.vm.hostname = HOSTNAME
+        end
+    end
+    
+    if $provider == "digital_ocean"
+        config.vm.provider :digital_ocean do |digitalocean, override|
+            config.vm.hostname = HOSTNAME
+            # all what is done in preseed files (see preseed-vsphere.cfg for example) must be done here for digitalocean
+            config.vm.provision "shell", inline: "echo 'Defaults env_keep += \"SSH_AUTH_SOCK DEBIAN_FRONTEND\"' >> /etc/sudoers"
+            config.vm.provision "shell", inline: "echo 'export DEBIAN_FRONTEND=noninteractive' >> /home/vagrant/.bashrc"
+            config.vm.provision "shell", inline: "echo 'export DEBIAN_FRONTEND=noninteractive' >> /root/.bashrc"
+            # Fix Timezone
+            config.vm.provision "shell", inline: "rm /etc/localtime; ln -s /usr/share/zoneinfo/UTC /etc/localtime"
+            config.vm.provision "shell", inline: "dpkg-reconfigure tzdata &> /dev/null"
+            config.vm.provision "shell", inline: "echo 'export DEBIAN_FRONTEND=noninteractive' >> /root/.bashrc"
+            # digital_ocean uses specific ssh keys, add vagrant ones
+            config.vm.provision "shell", inline: "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key' >> /home/vagrant/.ssh/authorized_keys"
+            config.vm.provision "shell", inline: "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key' >> /home/vagrant/.ssh/id_rsa.pub"
+            config.vm.provision "shell", inline: "echo 'Host *' >> /home/vagrant/.ssh/config"
+            config.vm.provision "shell", inline: "echo '   StrictHostKeyChecking no' >> /home/vagrant/.ssh/config"
+            config.vm.provision "shell", inline: "echo '   UserKnownHostsFile=/dev/null' >> /home/vagrant/.ssh/config"
+            config.vm.provision "shell", inline: $sshscript
+            config.vm.provision "shell", inline: "chmod 640 /home/vagrant/.ssh/id_rsa.pub"
+            config.vm.provision "shell", inline: "chmod 600 /home/vagrant/.ssh/id_rsa"
+            config.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/.ssh"
+            config.vm.provision "shell", inline: "chmod -R go-rwx /home/vagrant/.ssh/authorized_keys"
+            config.vm.provision "shell", inline: "cp -r /home/vagrant/.ssh /root/"
+            config.vm.provision "shell", inline: "chown -R root:root /root/.ssh/"
+            config.vm.provision "shell", inline: "sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config"
+            # sudo is already there
+            config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y install build-essential ruby-highline ruby-termios ntp linux-headers-amd64 dpkg screen htop wget curl openjdk-7-jre open-vm-tools rsync libpam-systemd python2.7 fabric resolvconf linux-image-amd64 openssh-server"
+            config.vm.provision "shell", inline: "echo 'blacklist ipv6' >> /etc/modprobe.d/blacklist.conf"
+            config.vm.provision "shell", inline: "echo 'fs.file-max = 404358' >> /etc/sysctl.conf"
+            config.vm.provision "shell", inline: "echo 'fs.file-max = 404358' >> /etc/sysctl.d/99-sysctl.conf"
+            config.vm.provision "shell", inline: "sysctl -p /etc/sysctl.conf"
+            config.vm.provision "shell", inline: "sysctl -p /etc/sysctl.d/99-sysctl.conf"
+            config.vm.provision "shell", inline: "echo '* - nofile 404358' >> /etc/security/limits.conf"
+            config.vm.provision "shell", inline: "echo 'root - nofile 404358' >> /etc/security/limits.conf"
+            config.vm.provision "shell", inline: "echo '#!/bin/bash' >> /home/vagrant/change_hostname.sh"; \
+            # digital_ocean with private networking needs second IP in hosts
+            config.vm.provision "shell", inline: "echo 'get_ip=\$(sudo ifconfig | grep -E -o \"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\" | head -n4 | tail -n1)' >> /home/vagrant/change_hostname.sh"
+            config.vm.provision "shell", inline: "echo 'sudo -s bash -c \"echo \\\"\$get_ip \$1\\\" >> /etc/hosts\"' >> /home/vagrant/change_hostname.sh"
+            config.vm.provision "shell", inline: "echo 'sudo -s bash -c \"sudo hostname \$1\"' >> /home/vagrant/change_hostname.sh"
+            config.vm.provision "shell", inline: "echo 'sudo -s bash -c \"echo \\\"\$1\\\" > /etc/hostname\"' >> /home/vagrant/change_hostname.sh"
+            config.vm.provision "shell", inline: "echo 'sudo -s bash -c \"sudo sed -i \\\"s/127.0.1.1.*$//g\\\" /etc/hosts\"' >> /home/vagrant/change_hostname.sh"
+            config.vm.provision "shell", inline: "echo 'sudo hostnamectl set-hostname \$1' >> /home/vagrant/change_hostname.sh"
+            config.vm.provision "shell", inline: "cp /home/vagrant/change_hostname.sh /root/change_hostname.sh"
+            config.vm.provision "shell", inline: "chmod 775 /home/vagrant/change_hostname.sh /root/change_hostname.sh"
+            config.vm.provision "shell", inline: "chown vagrant:vagrant /home/vagrant/change_hostname.sh"
+            config.vm.provision "shell", inline: "chown root:root /root/change_hostname.sh"
+            config.vm.provision "shell", inline: "apt-get clean"
+            config.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/"
+        end
+   end
 end

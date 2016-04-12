@@ -19,6 +19,7 @@ load 'basic/cassandra.rb'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
+  config.vm.provision "shell", inline: "systemctl start cassandra.service"
   config.vm.provision "shell", privileged: false,  inline: "sleep 60"
   config.vm.provision "shell", inline: "systemctl start kairosdb.service"
 
@@ -26,3 +27,4 @@ end
 
 load 'basic/sleep_5.rb'
 load 'basic/copy_files.rb'
+load 'basic/provider_specific_end.rb'

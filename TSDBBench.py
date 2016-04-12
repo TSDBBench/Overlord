@@ -28,17 +28,19 @@ def run_workload(genDict, dbDict, dbName, workloadName, timeseries, granularity,
     else:
         command = "nohup "
     ipStr = ""
+    hnStr = ""
     for dbKey in  sorted(dbDict.keys()):
         if dbDict[dbKey] == None or dbDict[dbKey] == "":
             ipStr += "%s " %(dbDict[dbKey].vm.hostname())
             logger.warning("IP of vm %s is None or an empty string, using hostname instead. This does not work on some providers (e.g. OpenStack)!" %(dbKey))
         else:
             ipStr += "%s " %(dbDict[dbKey].ip)
+        hnStr += "%s " % (dbDict[dbKey].name) #.vm.hostname() does not work here!
     ip0 = dbDict[dbDict.keys()[0]].ip
     if ip0 == None or ip0 == "":
         ip0 = dbDict[dbDict.keys()[0]].vm.hostname()
-    logger.info("BEGIN: Running workload '%s' on %s with ip string %s." %(workloadName,ip0,ipStr))
-    command+="python2 /home/vagrant/files/RunWorkload.py -d %s -w %s -i %s" %(dbName,workloadName,ipStr)
+    logger.info("BEGIN: Running workload '%s' on %s with ip string %s and hostname string %s." %(workloadName,ip0,ipStr,hnStr))
+    command+="python2 /home/vagrant/files/RunWorkload.py -d %s -w %s -i %s -s %s" %(dbName,workloadName,ipStr,hnStr)
     if timeseries:
         command+=" -t"
     if granularity:
@@ -200,7 +202,7 @@ def cleanup_vms(vmDict,logger, linear):
         vmDict.pop(key)
 
 # Configure ArgumentParser
-parser = argparse.ArgumentParser(prog="TSDBBench.py",version=__version__,description="Bla", formatter_class=argparse.RawDescriptionHelpFormatter, epilog="")
+parser = argparse.ArgumentParser(prog="TSDBBench.py",version=__version__,description="A tool for automated bencharming of time series databases.", formatter_class=argparse.RawDescriptionHelpFormatter, epilog="")
 parser.add_argument("-l", "--log", action='store_true', help="Be more verbose, log vagrant output.")
 parser.add_argument("-t", "--tmpfolder", metavar="TMP", required=True, help="Path to Temp Space")
 parser.add_argument("-f", "--vagrantfolders", metavar="VAGRANT", nargs='+', required=True, help="Path to folder(s) with Vagrantfiles. Files from additional folder(s) overwrite existing files from preceding folder(s).")
@@ -234,6 +236,11 @@ logger.addHandler(handler)
 if args.provider == "digital_ocean" and not args.linear:
     logger.warning("Provider '%s' does not support parallel creation of VMs. Linear creation is automatically enabled. See https://github.com/devopsgroup-io/vagrant-digitalocean/pull/230 for further details." % args.provider)
     args.linear = True
+
+if len(args.databases) > 1 and (args.nodestroy or args.noshutdown):
+    logger.warning("The arguments --noshutdown and --nodestroy do not work with multiple databases at one run. Both are automatically disabled.")
+    args.nodestroy = False
+    args.noshutdown = False
 
 # File checks and deletions (if necessary)
 for folder in args.vagrantfolders:

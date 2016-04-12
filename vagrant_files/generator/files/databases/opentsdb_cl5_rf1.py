@@ -26,11 +26,16 @@ __version__ = "0.01"
 # check_dict -> list of commands to run after prerun for each db vm (key=number of vm) (without ycsb, sync or space diff or poweroff commands!) (%%SSH%% not needed)
 # basic -> True/False, if True this is a basic database, so no need to ssh for space checking
 # sequence -> which vm should be provisioned first? (for all postrun/prerun dicts/lists. First number is considered master db vm, rest are slaves.)
+# include -> which base modules should be imported and added to the dictionary (standard functions that are reusable). Warning: infinite import loop possible!
 # the following variables are possible in prerun_once, postrun_once, prerun, prerun_master, prerun_slaves, check, check_master, check_slaves, postrun, postrun_master, postrun_slaves, prerun_dict, postrun_dict, check_dict, db_args:
 # %%IP%% -> IP of (actual) db vm
 # %%IPgen%% -> IP of (actual) generator vm (on which this script runs)
 # %%IPn%% -> IP of db vm number n (e.g. %%IP2%%)
 # %%IPall%% -> give String with IP of all vms)
+# %%HN%% -> Hostname of (actual) db vm
+# %%HNgen%% -> Hostname of (actual) generator vm (on which this script runs)
+# %%HNn%% -> Hostname of db vm number n (e.g. %%HN2%%)
+# %%HNall%% -> give String with Hostname of all vms)
 # %%SSH%% -> if SSH should be used (set at the beginning)
 # Order of Preruns/Postruns:
 # 1. prerun/postrun/check, 2. prerun_master/postrun_master/check_master, 3. preun_skaves/postrun_slaves/check_slaves, 4.prerun_dict/postrun_dict/check_dict
@@ -47,41 +52,16 @@ def getDict():
     dbConfig["jvm_args"]="-jvm-args='-Xmx4096m'"
     dbConfig["prerun_once"]= []
     dbConfig["postrun_once"]= []
-    dbConfig["prerun"]= [ "%%SSH%%sudo -s bash -c 'echo -e \"%%IP0%% vm0\" >> /etc/hosts'",
-        "%%SSH%%sudo -s bash -c 'echo -e \"%%IP1%% vm1\" >> /etc/hosts'",
-        "%%SSH%%sudo -s bash -c 'echo -e \"%%IP2%% vm2\" >> /etc/hosts'",
-        "%%SSH%%sudo -s bash -c 'echo -e \"%%IP3%% vm3\" >> /etc/hosts'",
-        "%%SSH%%sudo -s bash -c 'echo -e \"%%IP4%% vm4\" >> /etc/hosts'"]
-        # "%%SSH%%sudo -s bash -c 'echo -e \"%%IP0%% $(dig -x %%IP0%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /etc/hosts'",
-        # "%%SSH%%sudo -s bash -c 'echo -e \"%%IP1%% $(dig -x %%IP1%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /etc/hosts'",
-        # "%%SSH%%sudo -s bash -c 'echo -e \"%%IP2%% $(dig -x %%IP2%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /etc/hosts'",
-        # "%%SSH%%sudo -s bash -c 'echo -e \"%%IP3%% $(dig -x %%IP3%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /etc/hosts'",
-        # "%%SSH%%sudo -s bash -c 'echo -e \"%%IP4%% $(dig -x %%IP4%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /etc/hosts'",
-        # "%%SSH%%sudo -s bash -c 'sed -i \"s/master0/$(dig -x %%IP0%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )/g\" /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        # "%%SSH%%sudo -s bash -c 'sed -i \"s/slave0/$(dig -x %%IP1%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )/g\" /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        # "%%SSH%%sudo -s bash -c 'sed -i \"s/slave1/$(dig -x %%IP2%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )/g\" /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        # "%%SSH%%sudo -s bash -c 'sed -i \"s/slave2/$(dig -x %%IP3%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )/g\" /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        # "%%SSH%%sudo -s bash -c 'sed -i \"s/slave3/$(dig -x %%IP4%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )/g\" /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        #"%%SSH%%sudo -s bash -c 'sed -i \"s/master0/$(dig -x %%IP0%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )/g\" /home/vagrant/hadoop-2.7.1/etc/hadoop/core-site.xml'",
-        #"%%SSH%%sudo -s bash -c 'sed -i \"s/master0/$(dig -x %%IP0%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )/g\" /home/vagrant/hadoop-2.7.1/etc/hadoop/yarn-site.xml'"]
-        # ]
+    dbConfig["prerun"]= []
     dbConfig["postrun"]= []
-    dbConfig["prerun_master"]= []#"%%SSH%%sudo -s bash -c 'echo \"$(dig -x %%IP0%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        # "%%SSH%%sudo -s bash -c 'echo \"$(dig -x %%IP1%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        # "%%SSH%%sudo -s bash -c 'echo \"$(dig -x %%IP2%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        # "%%SSH%%sudo -s bash -c 'echo \"$(dig -x %%IP3%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        # "%%SSH%%sudo -s bash -c 'echo \"$(dig -x %%IP4%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /home/vagrant/hadoop-2.7.1/etc/hadoop/slaves'",
-        # "%%SSH%%sudo -s bash -c 'echo \"$(dig -x %%IP0%% | grep -A1 \"ANSWER SECTION\" | tail -n1 | awk \"{print $ 5}\" | sed \"s/\.$//g\" )\" >> /home/vagrant/hadoop-2.7.1/etc/hadoop/masters'",
-        # "%%SSH%%sudo -s bash -c '/home/vagrant/hadoop-2.7.1/bin/hdfs namenode -format test'"]
-        #"%%SSH%%sudo -s bash /home/vagrant/hadoop-2.7.1/sbin/start-dfs.sh",
-        #"%%SSH%%sudo -s bash /home/vagrant/hadoop-2.7.1/sbin/start-yarn.sh"]
+    dbConfig["prerun_master"]= []
     dbConfig["postrun_master"]= []
     dbConfig["prerun_slaves"]= []
     dbConfig["postrun_slaves"]= []
     dbConfig["prerun_dict"]= {
-        0 : ["%%SSH%%sudo -s bash -c '/home/vagrant/hadoop-2.7.1/bin/hdfs namenode -format test'",
-             "%%SSH%%sudo -s bash /home/vagrant/hadoop-2.7.1/sbin/start-dfs.sh",
-             #"%%SSH%%sudo -s bash /home/vagrant/hadoop-2.7.1/sbin/start-yarn.sh"
+        0 : ["%%SSH%%sudo -s bash -c '/home/vagrant/hadoop/bin/hdfs namenode -format test'",
+             "%%SSH%%sudo -s bash /home/vagrant/hadoop/sbin/start-dfs.sh",
+             #"%%SSH%%sudo -s bash /home/vagrant/hadoop/sbin/start-yarn.sh"
              "%%SSH%%sudo -s bash /home/vagrant/hbase/bin/start-hbase.sh",
              "%%SSH%%sudo -s bash -c 'sleep 10'",
              "%%SSH%%sudo -s bash -c \"COMPRESSION=LZO HBASE_HOME=/home/vagrant/hbase /usr/share/opentsdb/tools/create_table.sh\"",
@@ -108,4 +88,5 @@ def getDict():
     }
     dbConfig["basic"]= False
     dbConfig["sequence"]=[1,2,3,4,0]
+    dbConfig["include"]=["hostsfile","hbase", "hadoop"]
     return dbConfig

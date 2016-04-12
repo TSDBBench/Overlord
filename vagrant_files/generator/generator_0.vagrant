@@ -8,10 +8,10 @@ HOSTNAME = "gen0"
 load 'vagrantconf.rb'
 load 'vagrantconf_gen.rb'
 load 'basic/provider_specific.rb'
+load 'basic/change_hostname.rb'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-  config.vm.provision "shell", inline: "/root/change_hostname.sh gen0"
   config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y update"
   config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y  install postgresql-client mysql-client libmysql-java libpostgresql-jdbc-java libcsv-java"
   config.vm.provision "shell", privileged: false,  inline: "if [ \\( -f /vagrant/files/ycsb.tar.gz -a -r /vagrant/files/ycsb.tar.gz \\) -o \\( -f /vagrant/files/ycsb-0.4.0.tar.gz -a -r /vagrant/files/ycsb-0.4.0.tar.gz \\) ]; then if [ -f /vagrant/files/ycsb-0.4.0.tar.gz ]; then mv /vagrant/files/ycsb-0.4.0.tar.gz /home/vagrant/ycsb.tar.gz; else mv /vagrant/files/ycsb.tar.gz /home/vagrant/ycsb.tar.gz; fi; else wget -O /home/vagrant/ycsb.tar.gz -t 10 --retry-connrefused -nv \"#{$links_ycsbts}\" ; fi"
@@ -26,3 +26,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files/libs ]; then mv /home/vagrant/files/libs /home/vagrant/; fi"
 
 end
+
+load 'basic/provider_specific_end.rb'
