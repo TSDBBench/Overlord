@@ -17,10 +17,10 @@ import Vm
 logFile='pyvagrant.log'
 pyYcsbPdfGenPath="ProcessYcsbLog.py"
 testDBs=['basicdb','basicjdbc','basickairosdb','basicopentsdb']
-vagrantCredFiles=["vagrantconf.rb", "vagrantconf_gen.rb", "vagrantconf_db.rb"]
+vagrantCredFiles=["vagrantconf.rb", "vagrantconf_gen.rb", "vagrantconf_db.rb", "aws_commands.txt"]
 vagrantBasicFilesFolder="basic"
 
-availProviders=['virtualbox', 'vsphere', 'openstack', 'digital_ocean'] # First one is default
+availProviders=['virtualbox', 'vsphere', 'openstack', 'digital_ocean', 'aws'] # First one is default
 
 def run_workload(genDict, dbDict, dbName, workloadName, timeseries, granularity, bucket, test, onlyPrerun, debug, logger):
     if test:

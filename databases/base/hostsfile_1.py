@@ -5,11 +5,6 @@ __author__ = 'Andreas Bader'
 __version__ = "0.01"
 
 # db_folders -> List of DB Folder (for space check)
-# db_client -> name of ycsb client
-# db_args -> special ycsb arguments for this db
-# db_name -> name of this db (e.g. for workload file)
-# db_desc -> more detailed name/description
-# jvm_args -> special jvm_args for this db and ycsb
 # prerun_once -> list of commands to run local once before ycsb (%%IP%% uses first db vm) (without ycsb, sync or space diff or poweroff commands!)
 # postrun_once -> list of commands to run local once after ycsb (%%IP%% uses first db vm) (without ycsb, sync or space diff or poweroff commands!)
 # prerun -> list of commands to run before ycsb (all vms or local) (without ycsb, sync or space diff or poweroff commands!)
@@ -24,8 +19,6 @@ __version__ = "0.01"
 # check_master -> list of commands to run after prerun (all vms or local) for checking if everything runs correctly (only on master(first=ID 0) vm or local))
 # check_slaves -> list of commands to run after prerun (all vms or local) for checking if everything runs correctly (all without master(=ID 0)) vms or local))
 # check_dict -> list of commands to run after prerun for each db vm (key=number of vm) (without ycsb, sync or space diff or poweroff commands!) (%%SSH%% not needed)
-# basic -> True/False, if True this is a basic database, so no need to ssh for space checking
-# sequence -> which vm should be provisioned first? (for all postrun/prerun dicts/lists. First number is considered master db vm, rest are slaves.)
 # include -> which base modules should be imported and added to the dictionary (standard functions that are reusable). Warning: infinite import loop possible!
 # the following variables are possible in prerun_once, postrun_once, prerun, prerun_master, prerun_slaves, check, check_master, check_slaves, postrun, postrun_master, postrun_slaves, prerun_dict, postrun_dict, check_dict, db_args:
 # %%IP%% -> IP of (actual) db vm
@@ -42,29 +35,26 @@ __version__ = "0.01"
 # General Order:
 #  prerun -> check -> ycsb -> postrun
 
+# this configures /etc/hosts with the correct host names for 1 vm
+
 def getDict():
-    dbConfig={}
-    dbConfig["db_folders"]=["/var/lib/influxdb"] # because /var/opt/influxdb/data does not exist at start (was: ["/var/opt/influxdb/data", "/var/opt/influxdb/wal"])
-    dbConfig["db_client"]="influxdb"
-    dbConfig["db_args"]="-p ip=%%IP%% -p port=8086"
-    dbConfig["db_name"]="influxdb_cl5_rf1"
-    dbConfig["db_desc"]="InfluxDB on 5 VMs with Replication Factor 1."
-    dbConfig["jvm_args"]="-jvm-args='-Xmx4096m'"
-    dbConfig["prerun_once"]= []
-    dbConfig["postrun_once"]= []
-    dbConfig["prerun"]= []
-    dbConfig["postrun"]= []
-    dbConfig["prerun_master"]= []
-    dbConfig["postrun_master"]= []
-    dbConfig["prerun_slaves"]= []
-    dbConfig["postrun_slaves"]= []
-    dbConfig["prerun_dict"]= {}
-    dbConfig["postrun_dict"]= {}
-    dbConfig["check"]= []
-    dbConfig["check_master"]= []
-    dbConfig["check_slaves"]= []
-    dbConfig["check_dict"]= {}
-    dbConfig["basic"]= False
-    dbConfig["sequence"]=[0,1,2,3,4]
-    dbConfig["include"] = ["hostsfile_5", "influxdb_cluster", "influxdb_cluster_rf1"]
-    return dbConfig
+    baseConfig={}
+    baseConfig["db_folders"]=[]
+    baseConfig["prerun_once"]= []
+    baseConfig["postrun_once"]= []
+    baseConfig["prerun"] = [
+        "%%SSH%%sudo -s bash -c 'echo -e \"%%IP0%% %%HN0%%\" >> /etc/hosts'",
+    ]
+    baseConfig["postrun"]= []
+    baseConfig["prerun_master"]= []
+    baseConfig["postrun_master"]= []
+    baseConfig["prerun_slaves"]= []
+    baseConfig["postrun_slaves"]= []
+    baseConfig["prerun_dict"]= {}
+    baseConfig["postrun_dict"]= {}
+    baseConfig["check"]= []
+    baseConfig["check_master"]= []
+    baseConfig["check_slaves"]= []
+    baseConfig["check_dict"]= {}
+    baseConfig["include"] = []
+    return baseConfig

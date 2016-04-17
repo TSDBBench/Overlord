@@ -1,0 +1,12 @@
+#!/bin/bash
+addgroup vagrant
+adduser --home /home/vagrant --shell /bin/bash --ingroup vagrant -q --disabled-password -gecos '' vagrant
+echo 'vagrant:vagrant' | sudo chpasswd
+gpasswd -a vagrant admin
+gpasswd -a admin vagrant
+gpasswd -a vagrant sudo
+echo 'export DEBIAN_FRONTEND=noninteractive' >> /home/admin/.bashrc
+chown admin:admin /home/admin/.bashrc
+cp -r /home/admin/.ssh /home/vagrant/.ssh 
+chown -R vagrant:vagrant /home/vagrant/.ssh
+echo 'vagrant ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/90-vagrant-user

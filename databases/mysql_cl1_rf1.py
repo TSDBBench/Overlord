@@ -69,5 +69,5 @@ def getDict():
     dbConfig["check_dict"]= {}
     dbConfig["basic"]= False
     dbConfig["sequence"]=[0]
-    dbConfig["include"] = ["hostsfile"]
+    dbConfig["include"] = ["hostsfile_1"]
     return dbConfig

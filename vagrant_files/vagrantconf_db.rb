@@ -12,6 +12,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     digitalocean.image = "debian-8-x64"
     digitalocean.size = "16gb" 
   end
+  config.vm.provider :aws do |aws, override|
+    aws.instance_type = "t2.micro"
+    aws.ami = "ami-ccc021a3" # Debian Jessie
+    aws.block_device_mapping = [{ 'DeviceName' => '/dev/xvda', 'Ebs.VolumeSize' => 20, 'Ebs.VolumeType' => 'gp2' }]
+  end
 end
 
 # 512mb is not enough for cassandra

@@ -66,5 +66,5 @@ def getDict():
     dbConfig["check_dict"]= {}
     dbConfig["basic"]= False
     dbConfig["sequence"]=[0,1,2,3,4]
-    dbConfig["include"] = ["hostsfile", "influxdb_cluster", "influxdb_cluster_rf2"]
+    dbConfig["include"] = ["hostsfile_5", "influxdb_cluster", "influxdb_cluster_rf2"]
     return dbConfig

@@ -35,7 +35,7 @@ __version__ = "0.01"
 # General Order:
 #  prerun -> check -> ycsb -> postrun
 
-# this configures /etc/hosts with the correct host names
+# this configures /etc/hosts with the correct host names for 5 vms
 
 def getDict():
     baseConfig={}

@@ -31,8 +31,8 @@ SSHSCRIPT
 load 'basic/provider_detect.rb'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-    if $provider == "digital_ocean"
-        config.vm.provider :digital_ocean do |digitalocean, override|
+    if $provider == "digital_ocean" || $provider == "aws"
+        config.vm.provider :provider do |provider, override|
             config.vm.provision "shell", inline: "sed -i 's|http://http.debian.net/debian|http://ftp.de.debian.org/debian/|g' /etc/apt/sources.list"
             config.vm.provision "shell", inline: "sed -i 's|main$|main contrib non-free|g' /etc/apt/sources.list"
         end
@@ -45,21 +45,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Hostname can't be set for vsphere this way, otherwise
     # boexes randomly hang at "setting hostname..."
-    if $provider == "openstack"
-        config.vm.provider :openstack do |openstack, override|
+    if $provider == "openstack" || $provider == "virtualbox" || $provider == "aws" || $provider == "digital_ocean"
+        config.vm.provider :provider do |provider, override|
             config.vm.hostname = HOSTNAME
         end
     end
-    
-    if $provider == "virtualbox"
-        config.vm.provider :virtualbox do |virtualbox, override|
-            config.vm.hostname = HOSTNAME
-        end
-    end
-    
-    if $provider == "digital_ocean"
-        config.vm.provider :digital_ocean do |digitalocean, override|
-            config.vm.hostname = HOSTNAME
+     
+    if $provider == "digital_ocean" || $provider == "aws"
+        config.vm.provider :provider do |provider, override|
             # all what is done in preseed files (see preseed-vsphere.cfg for example) must be done here for digitalocean
             config.vm.provision "shell", inline: "echo 'Defaults env_keep += \"SSH_AUTH_SOCK DEBIAN_FRONTEND\"' >> /etc/sudoers"
             config.vm.provision "shell", inline: "echo 'export DEBIAN_FRONTEND=noninteractive' >> /home/vagrant/.bashrc"
@@ -67,8 +60,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             # Fix Timezone
             config.vm.provision "shell", inline: "rm /etc/localtime; ln -s /usr/share/zoneinfo/UTC /etc/localtime"
             config.vm.provision "shell", inline: "dpkg-reconfigure tzdata &> /dev/null"
-            config.vm.provision "shell", inline: "echo 'export DEBIAN_FRONTEND=noninteractive' >> /root/.bashrc"
-            # digital_ocean uses specific ssh keys, add vagrant ones
+            # digital_ocean/aws use specific ssh keys, add vagrant ones
             config.vm.provision "shell", inline: "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key' >> /home/vagrant/.ssh/authorized_keys"
             config.vm.provision "shell", inline: "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key' >> /home/vagrant/.ssh/id_rsa.pub"
             config.vm.provision "shell", inline: "echo 'Host *' >> /home/vagrant/.ssh/config"
@@ -106,5 +98,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             config.vm.provision "shell", inline: "apt-get clean"
             config.vm.provision "shell", inline: "chown -R vagrant:vagrant /home/vagrant/"
         end
-   end
+    end
+
 end

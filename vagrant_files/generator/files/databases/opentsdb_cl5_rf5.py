@@ -88,5 +88,5 @@ def getDict():
     }
     dbConfig["basic"]= False
     dbConfig["sequence"]=[1,2,3,4,0]
-    dbConfig["include"] = ["hostsfile", "hbase", "hadoop"]
+    dbConfig["include"] = ["hostsfile_5", "hbase", "hadoop"]
     return dbConfig

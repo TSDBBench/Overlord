@@ -37,6 +37,30 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     digitalocean.setup = true
     digitalocean.backups_enabled = false
   end
+  # You need to create a Security Group that allows traffic from your IP (at least) to port 22
+  # In this example the security group is called "SSH"
+  # Links to Security Groups for region "eu-central-1":
+  # https://eu-central-1.console.aws.amazon.com/ec2/v2/home?region=eu-central-1#SecurityGroups:sort=groupId
+  # Otherwise you need to use a VPN connection and edit the configuration
+  # e.g. set aws. ssh_host_attribute  to :private_ip_address
+  # See https://github.com/mitchellh/vagrant-aws for further information
+  # A SSH Key must be added in the region used (manually via AWS Management Console)
+  # Username is admin in Debian Jessie's image but after aws_commands.txt is executed, user vagrant is existing
+  config.vm.provider :aws do |aws, override|
+    aws.access_key_id = ""
+    aws.secret_access_key = ""
+    aws.keypair_name = ""
+    aws.region = "eu-central-1"
+    aws.monitoring = false
+    aws.elastic_ip = false
+    aws.associate_public_ip = false
+    aws.security_groups = [ "default", "SSH" ] # default allows conntections inside VPC (between VMs)
+    aws.tenancy = "default"
+    aws.terminate_on_shutdown = false
+    aws. ssh_host_attribute = :public_ip_address
+    override.ssh.private_key_path = "~/.ssh/id_rsa"
+    aws.user_data = File.read("aws_commands.txt")
+  end
 end
 
 # links to prepackaged/precompiled stuff
