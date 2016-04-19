@@ -5,7 +5,7 @@ The Python and Vagrant part of TSDBBench
 
 The VMs are running on vSphere or Openstack, but you can choose to run TSDBBench.py on your local pc or on a Control VM.
 
-## Setup Elastic Infrastrcture
+## Setup Elastic Infrastructure
 For your elastic infrastructure you need image(s) as bases for vagrant to derive generator and tsdb vms from. You can choose wheter you want to use vSohere or Openstack, you don't need both.
 
 1. Create/Copy images:
@@ -130,5 +130,6 @@ for this example consider your new tsdb would be opentsdb:
   3. Testing
    - You need to copy the database files to /path/to/some/folder/TSDBBench/vagrant_files/generator/files/databases/
    - You can run either run "hooks/pre-commit" or "git commit -a" (runs the hook as well if setup correctly).
-  
-  
+
+## Related Projects
+ * [VPS Benchmarks](http://www.vpsbenchmarks.com/) - measurement of VPS performance
