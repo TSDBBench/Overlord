@@ -41,7 +41,7 @@ def getDict():
     dbConfig={}
     dbConfig["db_folders"]=["/db/"]
     dbConfig["db_client"]="seriesly"
-
+    dbConfig["db_args"]="-p port=3133 -p ip=%%IP%%"
     dbConfig["db_name"]="seriesly_cl1_rf1"
     dbConfig["db_desc"]="Seriesly on 1 VM."
     dbConfig["jvm_args"]="-jvm-args='-Xmx4096m'"
