@@ -36,42 +36,28 @@ __version__ = "0.01"
 # 1. prerun/postrun/check, 2. prerun_master/postrun_master/check_master, 3. preun_skaves/postrun_slaves/check_slaves, 4.prerun_dict/postrun_dict/check_dict
 # General Order:
 #  prerun -> check -> ycsb -> postrun
+
 def getDict():
     dbConfig={}
-    dbConfig["db_folders"]=["/var/lib/cassandra"]
-    dbConfig["db_client"]="databus"
-    dbConfig["db_args"]="-p port=8080 -p ip=%%IP%% -p user=admin -p apiKey=adminregkey -p tableType=rtstable"
-    dbConfig["db_name"]="databus_rtstable_cl1_rf1"
-    dbConfig["db_desc"]="Databus with Cassandra together on 1 VM."
+    # stores on memory => no space check 
+    dbConfig["db_folders"]=[]
+    dbConfig["db_client"]="kdbplus"
+    dbConfig["db_args"]="-p ip=%%IP%% -p port=5001"
+    dbConfig["db_name"]="kdbplus_cl1_rf1"
+    dbConfig["db_desc"]="kdb+ 32bit on 1 VM."
     dbConfig["jvm_args"]="-jvm-args='-Xmx4096m'"
     dbConfig["prerun_once"]= []
     dbConfig["postrun_once"]= []
-    dbConfig["prerun"]= ["%%SSH%%sudo -s bash -c 'sed -i \"s|- seeds: \\\\\"127.0.0.1\\\\\"|- seeds: \\\\\"%%IP0%%\\\\\"|g\" /etc/cassandra/cassandra.yaml'",
-                         "%%SSH%%sudo -s bash -c 'sed -i \"s|listen_address: localhost|listen_address: %%IP%%|g\" /etc/cassandra/cassandra.yaml'",
-                         "%%SSH%%sudo -s bash -c 'sed -i \"s|rpc_address: localhost|rpc_address: %%IP%%|g\" /etc/cassandra/cassandra.yaml'",
-                         "%%SSH%%sudo -s bash -c 'sed -i \"s|cluster_name:|#cluster_name:|g\" /etc/cassandra/cassandra.yaml'",
-                         "%%SSH%%sudo -s bash -c 'echo \"cluster_name: DatabusCluster\" >> /etc/cassandra/cassandra.yaml'",
-                         "%%SSH%%sudo -s bash -c 'cd /home/vagrant/files/databus-1.1.0-3661/webapp ; cp conf/application.conf.prod conf/application.conf'",
-                         "%%SSH%%sudo -s bash -c 'sed -i \"s|domain=|#domain=|g\" /home/vagrant/files/databus-1.1.0-3661/webapp/conf/application.conf'",
-                         "%%SSH%%sudo -s bash -c 'echo \"domain=none\" >> /home/vagrant/files/databus-1.1.0-3661/webapp/conf/application.conf'",
-                         "%%SSH%%sudo -s bash -c 'sed -i \"s|nosql.cassandra.seeds=|#nosql.cassandra.seeds=|g\" /home/vagrant/files/databus-1.1.0-3661/webapp/conf/application.conf'",
-                         "%%SSH%%sudo -s bash -c 'echo \"nosql.cassandra.seeds=%%IP%%:9160\"  >> /home/vagrant/files/databus-1.1.0-3661/webapp/conf/application.conf'",
-                         "%%SSH%%sudo -s bash -c 'sed -i \"s|nosql.cassandra.clusterName=|#nosql.cassandra.clusterName=|g\" /home/vagrant/files/databus-1.1.0-3661/webapp/conf/application.conf'",
-                         "%%SSH%%sudo -s bash -c 'echo \"nosql.cassandra.clusterName=DatabusCluster\" >> /home/vagrant/files/databus-1.1.0-3661/webapp/conf/application.conf'"
-                         ]     
+    dbConfig["prerun"]= []
     dbConfig["postrun"]= []
-    dbConfig["prerun_master"]= ["%%SSH%%sudo -s bash -c 'systemctl start cassandra.service'",
-                                "%%SSH%%sudo -s bash -c 'sleep 60'",
-                                "%%SSH%%sudo -s bash -c 'cd /home/vagrant/files/databus-1.1.0-3661/webapp ; nohup ./play1.3.x/play start'",
-                                "%%SSH%%sudo -s bash -c 'sleep 60'"]
+    dbConfig["prerun_master"]= []
     dbConfig["postrun_master"]= []
     dbConfig["prerun_slaves"]= []
     dbConfig["postrun_slaves"]= []
     dbConfig["prerun_dict"]= {}
     dbConfig["postrun_dict"]= {}
     dbConfig["check"]= []
-    dbConfig["check_master"]= ["%%SSH%%sudo -s bash -c 'exit $(systemctl status cassandra.service | grep -c \"active (exited)\")'",
-                        "%%SSH%%sudo -s bash -c 'exit $(($(systemctl status cassandra.service | grep -c \"active (running)\")-1))'"]
+    dbConfig["check_master"]= []
     dbConfig["check_slaves"]= []
     dbConfig["check_dict"]= {}
     dbConfig["basic"]= False

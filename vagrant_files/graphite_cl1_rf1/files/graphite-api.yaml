@@ -1,0 +1,3 @@
+whisper:
+  directories:
+    - /home/vagrant/graphite/storage/whisper

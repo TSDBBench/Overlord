@@ -6,7 +6,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "shell", inline: "apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 40976EAF437D05B5 3B4FE6ACC0B21F32"
   config.vm.provision "shell", inline: "apt-get update"
   config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y install openjdk-6-jre-headless libjpeg8 openjdk-6-jre openjdk-6-jdk"
-
+  config.vm.provision "shell", inline: "useradd -m axibase" # the deb package postinstall script has an error prompting for pw does not work, this part is skipped if the axibase user exists
 
 
   config.vm.provision "shell", inline: "apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 26AEE425A57967CFB323846008796A6514F3CB79"

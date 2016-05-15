@@ -42,7 +42,7 @@ def getDict():
     dbConfig["db_folders"]=["/var/lib/elasticsearch/"]
     dbConfig["db_client"]="elasticsearch"
     dbConfig["db_args"]="-p port=9300 -p cluster=elasticsearch -p ip=%%IP%%"
-
+    dbConfig["db_name"]="elasticsearch_cl5_rf1"
     dbConfig["db_desc"]="elasticsearch DB on 5 VMs."
     dbConfig["jvm_args"]="-jvm-args='-Xmx4096m'"
     dbConfig["prerun_once"]= []
