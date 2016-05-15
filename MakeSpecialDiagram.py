@@ -314,8 +314,9 @@ for ycsbfile in args.ycsbfiles:
         exit(-1)
 
 
-def generate_plot(dicts, keys, type, overwrite, logger):
-    fileName = "ycsb_combined_%s_%s.html" % (type.rsplit("(")[0].lower(),datetime.datetime.now().strftime("%Y%m%d%H%M"))
+def generate_plot(dicts, keys, type, overwrite, logger, fileName = None):
+    if not fileName:
+        fileName = "ycsb_combined_%s_%s.html" % (type.rsplit("(")[0].lower(),datetime.datetime.now().strftime("%Y%m%d%H%M"))
     dataDict={}
     factor=1.0
     if type in convertFromUsToMs:
@@ -354,6 +355,7 @@ def generate_plot(dicts, keys, type, overwrite, logger):
     bokeh.io.save(barPlot)
     return True
 
+
 # Wait until all threads are done
 logger.debug("Waiting until all files are loaded...")
 # only join() would make ctrl+c not work in combination with daemon=true
@@ -363,8 +365,13 @@ while threading.activeCount() > 1:
         thread.join(100)
 threads=[]
 
-if len(dicts.keys())==len(args.ycsbfiles):
-    generate_plot(dicts,args.keys,args.type, args.overwrite, logger)
+if len(dicts.keys())==len(args.ycsbfiles) or True:
+    for type in convertFromUsToMs:
+        db_names = '-'.join([f.split('_')[1] for f in args.ycsbfiles])
+        type_name = type.split("(")[0].lower()
+        filename = 'ycsb_combined_%s_%s_%s.html' % (type_name, '-'.join(args.keys) ,db_names)
+        print(filename)
+        generate_plot(dicts, args.keys, args.type, args.overwrite, logger, filename)
 else:
     logger.error(" %s Files and %s Dicts do not match, this should not happen." %(len(args.ycsbfiles),len(dicts.keys())))
     exit(-1)

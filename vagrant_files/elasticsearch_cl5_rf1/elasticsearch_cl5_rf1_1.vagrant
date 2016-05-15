@@ -1,0 +1,15 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm1"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+
+load 'basic/change_hostname.rb'
+load 'basic/update.rb'
+load 'basic/elasticsearch.rb'
+load 'basic/copy_files.rb'
+
