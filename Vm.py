@@ -167,9 +167,11 @@ class Vm():
 
     # Return the output
     def run_with_output (self,disableKnownHosts,command,warn_only=False,quiet=False):
-        with settings(host_string = self.vm.user_hostname_port(),
+        with hide('output','running', 'warnings', 'stdout', 'stderr'),\
+            settings(host_string = self.vm.user_hostname_port(),
                      key_filename = self.vm.keyfile(),
-                     disable_known_hosts = disableKnownHosts):
+                     disable_known_hosts = disableKnownHosts,
+                     warn_only = warn_only):
             result = run(command,warn_only=warn_only, quiet=quiet)
             return result
 

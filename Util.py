@@ -1,8 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 __author__ = 'Andreas Bader'
-__version__ = "0.02"
+__version__ = "1.00"
 
 import os
 import shutil
@@ -11,6 +13,7 @@ import random
 import string
 import distutils
 from distutils import dir_util
+import subprocess
 
 def check_file_readable(filename):
     if check_file_exists(filename) and os.access(filename, os.R_OK):
@@ -255,3 +258,25 @@ def unsorted_paths(path_list, logger, append_path="", reverse=False, return_sepe
 
 def get_random_string(length=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.SystemRandom().choice(chars) for _ in range(length))
+
+def get_terminal_size(logger):
+    # not portable, should be replaced with shutil.get_terminal_size() in Python 3
+    try:
+        return int(subprocess.check_output(['stty', 'size']).split()[1])
+    except ValueError:
+        logger.error("Cannot convert '%s' to integer. Defaulting to 0." %(subprocess.check_output(['stty', 'size']).split()[1]))
+        return 0
+
+def multiply_string(str, size):
+    return ''.join(["%s" % str for s in xrange(size)])
+
+# print without newline
+def print_wo_nl(str, flush=True):
+    print(str, end="")
+
+def timedelta_to_string(timedelta):
+    seconds_total = int(timedelta.total_seconds())
+    hours =  seconds_total / 3600
+    minutes = (seconds_total % 3600) / 60
+    seconds = (seconds_total % 3600) % 60
+    return "%s h %s m %s s" %(hours, minutes, seconds)

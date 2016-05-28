@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Andreas Bader'
-__version__ = "0.01"
+__version__ = "1.00"
 
 import logging
+import logging.config
 import argparse
 from fabric.api import *
 import os
@@ -13,12 +14,17 @@ import Util
 import subprocess
 import threading
 import Vm
+import ConfigParser
+import datetime
+import re
+import platform
 
-logFile='pyvagrant.log'
 pyYcsbPdfGenPath="ProcessYcsbLog.py"
 testDBs=['basicdb','basicjdbc','basickairosdb','basicopentsdb']
 vagrantCredFiles=["vagrantconf.rb", "vagrantconf_gen.rb", "vagrantconf_db.rb", "aws_commands.txt"]
 vagrantBasicFilesFolder="basic"
+logFile="debug_log_%s.log" % (time.strftime("%Y%m%d%H%M%S", time.localtime()))
+logConfigFile="logging.conf"
 
 availProviders=['virtualbox', 'vsphere', 'openstack', 'digital_ocean', 'aws'] # First one is default
 
@@ -80,9 +86,10 @@ def wait_for_vm(vms, logger, timeout=3600, noshutdown=False):
     return True
 
 def get_remote_file(vm,remotePath,localPath,logger):
-    with settings(host_string= vm.user_hostname_port(),
+    with hide('output','running', 'warnings', 'stdout', 'stderr'),\
+         settings(host_string= vm.user_hostname_port(),
                  key_filename = vm.keyfile(),
-                 disable_known_hosts = True):
+                 disable_known_hosts = True, warn_only=True):
         ret = get(remote_path=remotePath, local_path=localPath)
     if len(ret) > 1:
         logger.warning("More than one file copied from %s to %s: %s." %(remotePath, localPath, ret))
@@ -91,9 +98,11 @@ def get_remote_file(vm,remotePath,localPath,logger):
     return ret
 
 def rm_remote_file(vm,remotePath,logger):
-    with settings(host_string= vm.user_hostname_port(),
-                 key_filename = vm.keyfile(),
-                 disable_known_hosts = True):
+    with hide('output','running', 'stdout'),\
+         settings(host_string= vm.user_hostname_port(),
+                  key_filename = vm.keyfile(),
+                  disable_known_hosts = True,
+                  warn_only = True):
         run ("rm %s" %(remotePath))
 
 def get_ycsb_file(vm,dbName,workloadName,logger):
@@ -104,7 +113,8 @@ def get_ycsb_file(vm,dbName,workloadName,logger):
         return None
     return ret[0]
 
-def check_result_file(path):
+# returns True when errors are found
+def check_result_file(path, logger):
     if Util.check_file_exists(path):
         file = open(path,"r")
         errorsFound = False
@@ -128,16 +138,64 @@ def check_result_file(path):
             logger.error("The following errors occurred: ")
             for error in errors:
                 logger.error(error)
+            return True
         if warningsFound:
             logger.warning("The following warnings occurred: ")
             for warning in warnings:
                 logger.warning(warning)
+            return True
         if exceptionsFound:
             logger.error("The following exceptions occurred: ")
             for exception in exceptions:
                 logger.error(exception)
+            return True
     else:
         logger.error("%s not found, can't check for errors." %(path))
+        return True
+
+# returns True when not all queries are executed
+# only possible for testworkload and testworkloadb
+# machtes two lines:
+# [INSERT], Operations, 1000
+# and
+# [INSERT], Return=0, 1000
+# both numbers on the end of the line must be the same
+def check_result_file_extended(path, workload, logger):
+    if workload not in ["testworkloada", "testworkloadb"]:
+        return False
+    if Util.check_file_exists(path):
+        file = open(path, "r")
+        resultDict={}
+        error = False
+        for line in file:
+            if re.match("\[(INSERT|READ|SCAN|AVG|COUNT|SUM)\],\s*(Return=|Operations).+$", line) != None:
+                splitters = line.split(",")
+                queryType = splitters[0].replace("[","").replace("]","")
+                lineType = splitters[1]
+                amount = int(splitters[2].replace(" ",""))
+                if "Operations" in lineType:
+                    if queryType in resultDict.keys():
+                        error = True # nothing should be found twice
+                    else:
+                        resultDict[queryType] = [amount,0]
+                elif "Return=" in lineType:
+                    if queryType not in resultDict.keys():
+                        error = True # should already be found in operations line
+                    else:
+                        resultDict[queryType][1]+=amount
+        sum = 0
+        for key in resultDict:
+            if key != "INSERT":
+                sum += resultDict[key][1]
+            if resultDict[key][0] != resultDict[key][1]:
+                return True
+        if (workload == "testworkloada" and len(resultDict.keys()) != 2 and sum !=  resultDict["INSERT"][1]) or \
+           (workload == "testworkloadb" and len(resultDict.keys()) != 5 and sum !=  resultDict["INSERT"][1])    :
+            return True
+        return error
+    else:
+        logger.error("%s not found, can't check for errors." % (path))
+        return True
 
 def generate_html(paths, pdf, overwrite):
     if Util.check_file_exists(pyYcsbPdfGenPath):
@@ -201,6 +259,8 @@ def cleanup_vms(vmDict,logger, linear):
         cleanup_vm(key, vmDict[key].vm,vmDict[key].pathFolder,vmDict[key].pathVagrantfile, logger, linear)
         vmDict.pop(key)
 
+overallTime=datetime.datetime.now()
+
 # Configure ArgumentParser
 parser = argparse.ArgumentParser(prog="TSDBBench.py",version=__version__,description="A tool for automated bencharming of time series databases.", formatter_class=argparse.RawDescriptionHelpFormatter, epilog="")
 parser.add_argument("-l", "--log", action='store_true', help="Be more verbose, log vagrant output.")
@@ -218,20 +278,54 @@ parser.add_argument("-p", "--pdf", action='store_true', help="Generate pdf outpu
 parser.add_argument("-u", "--nohup", action='store_true', help="Also fetch nohup output (for debugging only)")
 parser.add_argument("-c", "--linear", action='store_true', help="Create VMs linear, do not use parallelisation.")
 parser.add_argument("-r", "--provider", metavar="PROVIDER", type=str, default=availProviders[0], choices=availProviders, help="Which provider to use. Available: %s" %(availProviders))
+parser.add_argument("-z", "--test", action='store_true', help="Test mode. Goes through all or the given databases with the given workload and tests each database. When using testworkloada or testworkloadb it is also checked if the amount of queries matches.")
 
 args = parser.parse_args()
 
 # Configure Logging
 logLevel = logging.WARN
-if args.log:
+if args.log and not args.test:
     logLevel = logging.DEBUG
-logging.basicConfig(level=logLevel)
-logger = logging.getLogger(__name__)
-handler = logging.FileHandler(logFile)
-handler.setLevel(logLevel)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+try:
+    logging.config.fileConfig(logConfigFile)
+except ConfigParser.NoSectionError:
+    print("Error: Can't load logging config from '%s'." %(logConfigFile))
+    exit(-1)
+
+logger = logging.getLogger("TSDBBench")
+if not args.test:
+    for handler in logger.handlers:
+        handler.setLevel(logLevel)
+else:
+    logger.handlers = []
+
+if not Util.delete_file(logFile,logger,True):
+    exit(-1)
+
+if args.log or args.test:
+    handler = logging.FileHandler(logFile)
+    if args.test:
+        handler.setLevel(logging.DEBUG)
+    else:
+        handler.setLevel(logLevel)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s: %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+if args.test:
+    print("Executing in test mode.")
+    print("Python: %s" %(platform.python_version()))
+    print("Platform: %s" %(platform.platform()))
+    print("Databases: %s" % (args.databases))
+    print("Workload: %s" %(args.workload))
+    if args.workload == "testworkloada" or args.workload == "testworkloadb":
+        print("Result checking is used for this workload.")
+    else:
+        print("Result checking is NOT used for this workload.")
+    print("Provider: %s" %(args.provider))
+    print("Parallel creation of VMs: %s" %(not args.linear))
+    print("Log is written to '%s'." %(logFile))
+    print("Logging to shell is disabled (except fabric warnings).")
 
 if args.provider == "digital_ocean" and not args.linear:
     logger.warning("Provider '%s' does not support parallel creation of VMs. Linear creation is automatically enabled. See https://github.com/devopsgroup-io/vagrant-digitalocean/pull/230 for further details." % args.provider)
@@ -256,15 +350,19 @@ for vagrantCredFile in vagrantCredFiles:
         exit(-1)
 if not Util.check_folder(args.tmpfolder,logger):
     exit(-1)
-if not Util.delete_file(logFile,logger,True):
-    exit(-1)
 
 generators={} # list of generator vms
 dbs={} # dictinary of db vms
 # format "name" = {"path_folder" : "/bla/tmppath", "path_vagrantfile":"/bla/tmppath/file", "vm": vm}
 
+creationTimesGenerators=datetime.datetime.now()
+
+termSize = Util.get_terminal_size(logger)
 
 # Generating Generator VMs
+if args.test:
+    print(Util.multiply_string("-", termSize))
+    print("Stage 1: Creation of generator VMs.")
 generatorFound=False
 for path, dir in Util.unsorted_paths(args.vagrantfolders,logger,"",True):
     if os.path.isdir(os.path.join(path, dir)) and dir == "generator":
@@ -286,14 +384,21 @@ for path, dir in Util.unsorted_paths(args.vagrantfolders,logger,"",True):
                             or (args.databases and Util.check_if_eq_databases(split[0], args.databases)) \
                             or (args.databases and Util.check_if_eq_databases(split[0].rsplit("_",1)[0], args.databases)):
                         if args.linear:
+                            if args.test:
+                                Util.print_wo_nl(split[0] + Util.multiply_string(".", termSize-len(split[0])-len("[ERROR]")))
                             virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                             virtMachine.create_vm()
                             generators[virtMachine.name] = virtMachine
                             if not virtMachine.created:
-                                logger.error("VM %s could not be created." %(split[0]))
+                                if args.test:
+                                    print("[ERROR]")
+                                else:
+                                    logger.error("VM %s could not be created." %(split[0]))
                                 if not args.nodestroy:
                                     cleanup_vms(generators,logger, args.linear)
                                 exit(-1)
+                            if args.test:
+                                print("[OK]")
                         else:
                             virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                             virtMachine.start()
@@ -304,6 +409,9 @@ for path, dir in Util.unsorted_paths(args.vagrantfolders,logger,"",True):
             exit(-1)
         break
 
+if args.linear:
+    creationTimesGenerators = datetime.datetime.now() - creationTimesGenerators
+
 if not generatorFound:
     logger.error("No Generator found, %s does not exist." %(Util.unsorted_paths(args.vagrantfolders, logger, "generator")))
     exit(-1)
@@ -311,32 +419,59 @@ if not generatorFound:
 if args.databases and (Util.check_if_eq_databases("generator",args.databases) or Util.check_if_eq_databases_rsplit("generator",args.databases)):
     if not args.linear:
         for generatorKey in generators.keys():
+            if args.test:
+                Util.print_wo_nl(generatorKey + Util.multiply_string(".", termSize - len(generatorKey) - len("[ERROR]")))
             logger.info("Wait for creation of %s to finish." %(generators[generatorKey].name))
             generators[generatorKey].join()
             if not generators[generatorKey].created:
-                logger.error("VM %s could not be created." %(generators[generatorKey].name))
+                if args.test:
+                    print("[ERROR]")
+                else:
+                    logger.error("VM %s could not be created." %(generators[generatorKey].name))
                 if not args.nodestroy:
                     cleanup_vms(generators, logger, args.linear)
                 exit(-1)
+            if args.test:
+                print("[OK]")
+        creationTimesGenerators = datetime.datetime.now() - creationTimesGenerators
     if not args.nodestroy:
         cleanup_vms(generators, logger, args.linear)
     exit(0)
+
+if args.test and args.linear:
+    print(Util.multiply_string("-", termSize))
+    print("Stage 2: Creation of database VMs  and execution of workloads.")
 
 ycsbfiles=[]
 processedDatabaseVMs=[] # for multi-vagrantfolder-function
 processedDatabases=[]
 
+failedDatabases=[]
+workingDatabases=[]
+notTestedDatabases=list(args.databases)
+creationTimesDB={}
+workloadTimes={}
+
 # Doing Tests if basic or test is in given dbs
 if args.databases and (Util.check_if_eq_databases("basic", args.databases) or Util.check_if_eq_databases("test", args.databases)):
     if not args.linear:
         for generatorKey in generators.keys():
+            if args.test:
+                Util.print_wo_nl(
+                    generatorKey + Util.multiply_string(".", termSize - len(generatorKey) - len("[ERROR]")))
             logger.info("Wait for creation of %s to finish." %(generators[generatorKey].name))
             generators[generatorKey].join()
             if not generators[generatorKey].created:
-                logger.error("VM %s could not be created." %(generators[generatorKey].name))
+                if args.test:
+                    print("[ERROR]")
+                else:
+                    logger.error("VM %s could not be created." %(generators[generatorKey].name))
                 if not args.nodestroy:
                     cleanup_vms(generators, logger, args.linear)
                 exit(-1)
+            if args.test:
+                print("[OK]")
+            creationTimesGenerators = datetime.datetime.now() - creationTimesGenerators
     logger.info("Processing Test Databases")
     for database in testDBs:
         if args.workload:
@@ -344,7 +479,7 @@ if args.databases and (Util.check_if_eq_databases("basic", args.databases) or Ut
             run_workload(generators, generators, database, args.workload, args.timeseries, args.granularity, args.bucket, True, False, args.log, logger)
             ycsbFile = get_ycsb_file(generators[generators.keys()[0]].vm,database.lower(),args.workload.lower(),logger)
             ycsbfiles.append(ycsbFile)
-            check_result_file(ycsbFile)
+            check_result_file(ycsbFile, logger)
             if (args.html or args.pdf) and len(ycsbfiles) == 1:
                 generate_html([ycsbFile],args.pdf,False)
 
@@ -361,9 +496,16 @@ else:
                 continue
             found=0 # how many .vagrant files are found, At least 1 is needed!
             if not args.databases or args.databases == "" \
+                    or re.match("basic.*", dir) != None \
                     or (args.databases and not Util.check_if_eq_databases(dir, args.databases) and not Util.check_if_eq_databases("all", args.databases)):
                 continue
+            if Util.check_if_eq_databases("all", args.databases):
+                if "all" in notTestedDatabases:
+                    notTestedDatabases.remove("all")
+                if dir not in notTestedDatabases and dir not in workingDatabases and dir not in failedDatabases:
+                    notTestedDatabases.append(dir)
             logger.info("Processing %s." % (dir))
+            creationTimesDB[dir]=datetime.datetime.now()
             for path2, file in Util.unsorted_paths(args.vagrantfolders, logger, dir, True):
                 if os.path.isfile(os.path.join(path, dir, file)):
                     split = file.rsplit(".vagrant", 1)
@@ -377,11 +519,16 @@ else:
                                 or Util.check_if_eq_databases("all", args.databases)):
                             processedDatabaseVMs.append(split[0])
                             if args.linear:
+                                if args.test:
+                                    Util.print_wo_nl(dir + Util.multiply_string(".", termSize - len(dir) - len("[ERROR]")))
                                 virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                                 virtMachine.create_vm()
                                 dbs[virtMachine.name] = virtMachine
                                 if not virtMachine.created:
-                                    logger.error("VM %s could not be created." %(split[0]))
+                                    if args.test:
+                                        print("[ERROR]")
+                                    else:
+                                        logger.error("VM %s could not be created." %(split[0]))
                                     if not args.nodestroy:
                                         cleanup_vms(generators, logger, args.linear)
                                         cleanup_vms(dbs, logger, args.linear)
@@ -391,31 +538,51 @@ else:
                                 virtMachine.start()
                                 Util.sleep_random(1.0,5.0)  # needed for openstack, otherwise two vms get the same floating ip
                                 dbs[virtMachine.name] = virtMachine
+            if args.linear:
+                creationTimesDB[dir] = datetime.datetime.now() - creationTimesDB[dir]
             processedDatabases.append(dir)
             if not args.linear:
                 for generatorKey in generators.keys():
+                    if args.test and len(workingDatabases) == 0: # only before first database
+                        Util.print_wo_nl(generatorKey + Util.multiply_string(".", termSize - len(generatorKey) - len("[ERROR]")))
                     logger.info("Wait for creation of %s to finish." %(generators[generatorKey].name))
                     generators[generatorKey].join()
                     if not generators[generatorKey].created:
-                        logger.error("VM %s could not be created." %(generators[generatorKey].name))
+                        if args.test and len(workingDatabases) == 0: # only before first database
+                            print("[ERROR]")
+                        else:
+                            logger.error("VM %s could not be created." %(generators[generatorKey].name))
                         if not args.nodestroy:
                             cleanup_vms(generators, logger, args.linear)
                             cleanup_vms(dbs, logger, args.linear)
                         exit(-1)
+                    if args.test and len(workingDatabases) == 0: # only before first database
+                        print("[OK]")
+                if args.test:
+                    if len(workingDatabases) == 0: # only before first database, after last generator VM in parellel mode
+                        creationTimesGenerators = datetime.datetime.now() - creationTimesGenerators
+                        print(Util.multiply_string("-", termSize))
+                        print("Stage 2: Creation of database VMs  and execution of workloads.")
+                    Util.print_wo_nl(dir + Util.multiply_string(".", termSize - len(dir) - len("[ERROR]")))
                 for dbKey in dbs.keys():
                     logger.info("Wait for creation of %s to finish." %(dbs[dbKey].name))
                     dbs[dbKey].join()
                     if not dbs[dbKey].created:
-                        logger.error("VM %s could not be created." %(dbs[dbKey].name))
+                        if args.test:
+                            print("[ERROR]")
+                        else:
+                            logger.error("VM %s could not be created." %(dbs[dbKey].name))
                         if not args.nodestroy:
                             cleanup_vms(generators, logger, args.linear)
                             cleanup_vms(dbs, logger, args.linear)
                         exit(-1)
+                creationTimesDB[dir] = datetime.datetime.now() - creationTimesDB[dir]
             if found == 0:
                 logger.error("No .vagrant files found in %s." % (Util.unsorted_paths(args.vagrantfolders, logger, dir)))
 
 
             if args.workload:
+                workloadTimes[dir] = datetime.datetime.now()
                 logger.info("Starting workload '%s' on %s on Generator %s." %(args.workload,dbs[dbs.keys()[0]].vm.hostname(),generators[generators.keys()[0]].vm.hostname()))
                 run_workload(generators, dbs, dir, args.workload, args.timeseries, args.granularity, args.bucket, False, False, args.log, logger)
                 logger.info("Waiting for workload to finish...")
@@ -429,8 +596,18 @@ else:
                         get_remote_file(generators[generatorKey].vm,"/home/vagrant/nohup.out","./nohup_%s_%s_%s.out" % (dir.lower(), args.workload.lower(), nohupCounter), logger)
                         rm_remote_file(generators[generatorKey].vm,"/home/vagrant/nohup.out",logger)
                         nohupCounter+=1;
-
-                check_result_file(ycsbFile)
+                workloadTimes[dir] = datetime.datetime.now() - workloadTimes[dir]
+                checkResult=check_result_file(ycsbFile, logger)
+                if args.test:
+                    checkRestul2 = check_result_file_extended(ycsbFile, args.workload, logger)
+                    if checkResult or checkRestul2:
+                        print("[ERROR]")
+                        failedDatabases.append(dir)
+                        notTestedDatabases.remove(dir)
+                    else:
+                        print("[OK]")
+                        workingDatabases.append(dir)
+                        notTestedDatabases.remove(dir)
                 if (args.html or args.pdf) and len(args.databases) == 1 and len(ycsbfiles) == 1:
                     generate_html([ycsbFile],args.pdf,False)
 
@@ -453,7 +630,30 @@ else:
         cleanup_vms(generators, logger , args.linear)
 
 if (args.html or args.pdf) and len(ycsbfiles) > 1:
+    if args.test:
+        print(Util.multiply_string("-", termSize))
+        print("Stage 3: Creation ofcombined PDF file.")
     logger.info("More than one DB given, also generating combined html/pdf file.")
     generate_html(ycsbfiles,args.pdf,True)
+
+overallTime = datetime.datetime.now() - overallTime
+
+if args.test:
+    print(Util.multiply_string("-", termSize))
+    print("Statistics:")
+    print("Failed databases: %s" %(failedDatabases))
+    print("Not tested databases: %s" % (notTestedDatabases))
+    print("Working databases: %s" % (workingDatabases))
+    print("Amount of time needed overall: %s" %(Util.timedelta_to_string(overallTime)))
+    print("Amount of time needed to create generator VMs: %s" %(Util.timedelta_to_string(creationTimesGenerators)))
+    print("Amount of time needed to create database VMs:")
+    for key in creationTimesDB.keys():
+        timedelta_str = Util.timedelta_to_string(creationTimesDB[key])
+        print(key + Util.multiply_string("-", termSize-len(key)-len(timedelta_str)) + timedelta_str)
+    print("Amount of time needed to complete %s:" %(args.workload))
+    for key in workloadTimes.keys():
+        timedelta_str = Util.timedelta_to_string(workloadTimes[key])
+        print(key + Util.multiply_string("-", termSize - len(key) - len(timedelta_str)) + timedelta_str)
+    print("Ending with return code 0.")
 
 exit(0)
