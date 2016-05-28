@@ -5,7 +5,7 @@ The Python and Vagrant part of TSDBBench
 
 The VMs are running on vSphere or Openstack, but you can choose to run TSDBBench.py on your local pc or on a Control VM.
 
-# Setup Elastic Infrastrcture
+## Setup Elastic Infrastructure
 For your elastic infrastructure you need image(s) as bases for vagrant to derive generator and tsdb vms from. You can choose wheter you want to use vSohere or Openstack, you don't need both.
 
 1. Create/Copy images:
@@ -47,9 +47,9 @@ For your elastic infrastructure you need image(s) as bases for vagrant to derive
         nano vagrant_files/vagrantconf_gen.rb (add everything that says '')
         ./pySetupVsphere.py -f /path/to/some/folder/TSDBBench/vagrant_files/
 
-# Setup
+## Setup
 Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. But Ubuntu has different package names for a lot of the packages, you need to find and change them!
-## Choice 1: local pc
+### Choice 1: local pc
 1. Install packages:
 
         sudo apt-get install python-dateutil python-jinja2 python-numpy python-pandas python-flask python-redis python-requests python-six python-tornado python-werkzeug python-markupsafe python-greenlet python-zmq python-yaml python-pip wkhtmltopdf python-magic fabric vagrant zlib1g-dev zlib1g libxml2 libxml2-dev libxslt1.1 libxslt1-dev python-webcolors python-pyvmomi
@@ -78,10 +78,10 @@ Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. 
         nano vagrant_files/vagrantconf_db.rb
         nano vagrant_files/vagrantconf_gen.rb
         
-## Choice 2: Control VM
+### Choice 2: Control VM
   - Coming soon...
 
-# Running a testworkload
+## Running a testworkload
  - without creating html file:
  
         cd /path/to/some/folder/TSDBBench
@@ -91,7 +91,7 @@ Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. 
         cd /path/to/some/folder/TSDBBench
         ./TSDBBench.py -t /path/to/tmpfolder -f /path/to/some/folder/TSDBBench/vagrant_files -d mysql1 -l --provider 'vsphere' -w "testworkloada" -m
 
-# Creating html files (when not using -m)
+## Creating html files (when not using -m)
  - Creating a html file from a ycsb_*.log file:
 
         cd /path/to/some/folder/TSDBBench
@@ -107,7 +107,7 @@ Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. 
         cd /path/to/some/folder/TSDBBench
         ./ProcessYcsbLog.py -f some_ycsb_logfile1.ydc ome_ycsb_logfile2.log ome_ycsb_logfile3.ydc ...
         
-# Steps to add a new TSDB:
+## Steps to add a new TSDB:
 for this example consider your new tsdb would be opentsdb:
   1. Add Vagrantfiles:
    1. Create at least one folder in /path/to/some/folder/TSDBBench/vagrant_files
@@ -130,5 +130,6 @@ for this example consider your new tsdb would be opentsdb:
   3. Testing
    - You need to copy the database files to /path/to/some/folder/TSDBBench/vagrant_files/generator/files/databases/
    - You can run either run "hooks/pre-commit" or "git commit -a" (runs the hook as well if setup correctly).
-  
-  
+
+## Related Projects
+ * [VPS Benchmarks](http://www.vpsbenchmarks.com/) - measurement of VPS performance

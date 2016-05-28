@@ -1,0 +1,23 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm0"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.provision "shell", inline: "/root/change_hostname.sh vm0"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d /vagrant/files ]; then cp -r /vagrant/files ~/; fi"
+  config.vm.provision "shell", privileged: false,  inline: "if [ -d ~/files ]; then chmod +x -f ~/files/*.sh; exit 0; fi"   
+  config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y update"
+  config.vm.provision "shell", inline: "apt-get --allow-unauthenticated -q -y install unzip libc6-i386"
+  config.vm.provision "shell", privileged: false, inline: "unzip ~/files/linux.zip -d ~/"
+  config.vm.provision "shell", privileged: false, inline: "gcc ~/files/daemonize.c -o ~/daemonize"
+  config.vm.provision "shell", privileged: false, inline: "~/daemonize -e ~/q/l32/stderr -o ~/q/l32/stdout -p ~/q/l32/pidfile ~/q/l32/q -p 5001"
+  # config.vm.provision "shell", privileged: false, inline: "~/daemonize -e ~/q/l32/stderr -o ~/q/l32/stdout -p ~/q/l32/pidfile ~/q/l32/q ~/q/l32/qlog -l -p 5001"
+
+end

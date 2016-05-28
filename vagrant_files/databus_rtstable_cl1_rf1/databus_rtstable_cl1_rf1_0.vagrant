@@ -1,0 +1,17 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Databus on 1 VM with Replication Factor = 1
+# Date will be stored in a relational time series table
+
+VAGRANTFILE_API_VERSION = "2"
+
+HOSTNAME = "vm0"
+
+load 'vagrantconf.rb'
+load 'vagrantconf_db.rb'
+load 'basic/change_hostname.rb'
+load 'basic/update.rb'
+load 'basic/copy_files.rb'
+load 'basic/cassandra.rb'
+load 'basic/databus.rb'
