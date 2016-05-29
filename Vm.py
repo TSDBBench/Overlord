@@ -11,6 +11,7 @@ import os
 import Util
 import re
 from fabric.api import *
+import subprocess
 
 class Vm():
 
@@ -59,7 +60,16 @@ class Vm():
 
     def destroy(self):
         if self.vm != None:
-            return self.vm.destroy()
+            try:
+                if self.vm.status()[0].state == vagrant.Vagrant.RUNNING:
+                    self.vm.halt()
+                if self.vm.status()[0].state != vagrant.Vagrant.POWEROFF:
+                    self.vm.halt(force=True)
+                return self.vm.destroy()
+            except subprocess.CalledProcessError:
+                # ignore warnings that destroy did not work (occurs sometimes)
+                self.logger.warning("There might be some leftovers from vm '%s'." %(self.name))
+                return True
         return True
 
     def create_vm(self):
@@ -151,7 +161,7 @@ class Vm():
             #if not self.vm.destroy():
                 # self.logger.error('Can not destroy %s.' %(self.name), exc_info=True)
             ## vm.destroy() seems to be always returning false at this stage (opentsack), but destroying works fine -> Ignore it.
-            self.vm.destroy()
+            self.destroy()
             return False
         self.logger.info("END Creating %s." %(self.name))
         self.logger.info("GET IP of %s." %(self.name))
@@ -160,7 +170,7 @@ class Vm():
         if self.ip == None:
             self.logger.error('Failed getting IP while creating vm %s.' %(self.name), exc_info=True)
             self.logger.info('Since creation failed, trying to destroy vm %s.' %(self.name), exc_info=True)
-            self.vm.destroy()
+            self.destroy()
             return False
         self.created=True
         return True

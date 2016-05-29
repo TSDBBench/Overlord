@@ -167,6 +167,7 @@ def check_result_file_extended(path, workload, logger):
         file = open(path, "r")
         resultDict={}
         error = False
+        atLeastOneReturnedZeroDict = {}
         for line in file:
             if re.match("\[(INSERT|READ|SCAN|AVG|COUNT|SUM)\],\s*(Return=|Operations).+$", line) != None:
                 splitters = line.split(",")
@@ -179,6 +180,14 @@ def check_result_file_extended(path, workload, logger):
                     else:
                         resultDict[queryType] = [amount,0]
                 elif "Return=" in lineType:
+                    # check if at least a few non-INSERT queries returned 0 (=succesful)
+                    # INSERT queries must return 0, -1 is not allowed
+                    if queryType not in atLeastOneReturnedZeroDict.keys():
+                        atLeastOneReturnedZeroDict[queryType] = False
+                    if "Return=0" in lineType and "INSERT" in queryType and amount == resultDict[queryType][0]:
+                        atLeastOneReturnedZeroDict[queryType] = True
+                    elif "Return=0" in lineType and amount > 0:
+                        atLeastOneReturnedZeroDict[queryType] = True
                     if queryType not in resultDict.keys():
                         error = True # should already be found in operations line
                     else:
@@ -188,6 +197,9 @@ def check_result_file_extended(path, workload, logger):
             if key != "INSERT":
                 sum += resultDict[key][1]
             if resultDict[key][0] != resultDict[key][1]:
+                return True
+        for key in atLeastOneReturnedZeroDict:
+            if not atLeastOneReturnedZeroDict[key]:
                 return True
         if (workload == "testworkloada" and len(resultDict.keys()) != 2 and sum !=  resultDict["INSERT"][1]) or \
            (workload == "testworkloadb" and len(resultDict.keys()) != 5 and sum !=  resultDict["INSERT"][1])    :

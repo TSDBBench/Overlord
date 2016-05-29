@@ -1,0 +1,11 @@
+[Unit]
+Description=akumuli
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/home/vagrant/Akumuli/akumulid
+ExecStart=/home/vagrant/Akumuli/akumulid/akumulid
+
+[Install]
+WantedBy=multi-user.target

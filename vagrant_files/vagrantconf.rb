@@ -67,8 +67,12 @@ end
 $links_ycsbts = 'http://nemarcontrolvm.iaas.uni-stuttgart.de/bin/ycsb-0.4.0.tar.gz'
 $links_blueflood = 'http://nemarcontrolvm.iaas.uni-stuttgart.de/bin/blueflood-all-2.0.0-SNAPSHOT-jar-with-dependencies.jar'
   
+# Akumuli git link and commit id
+$git_akumuli_link = 'https://github.com/akumuli/Akumuli.git'
+$git_akumuli_hash = 'fa85dd90a2e09bc28630bbe3fdd28fe155566360'
+  
 # h5serv (hdf5) git commit ids
-$git_h5json = 'c31bfb7ff2da864a737ce9464ba1895b0d5af8f4'
+$git_h5json = 'a85c6b195dc63687391f8e69be3f6d595679c0f5'
 $git_h5serv = '18709351fb173697e323eb62828cb8868f2e1db3'
 
 # hbase

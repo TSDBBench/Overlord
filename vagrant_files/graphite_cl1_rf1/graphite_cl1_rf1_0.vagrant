@@ -7,9 +7,9 @@ HOSTNAME = "vm0"
 
 load 'vagrantconf.rb'
 load 'vagrantconf_db.rb'
-
+load 'basic/provider_specific.rb'
 load 'basic/change_hostname.rb'
 load 'basic/update.rb'
 load 'basic/copy_files.rb'
 load 'basic/graphite.rb'
-
+load 'basic/provider_specific_end.rb'
