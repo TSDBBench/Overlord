@@ -10,4 +10,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "shell", inline: "cp /vagrant/files/druid*.service /etc/systemd/system"
   config.vm.provision "shell", inline: "chown root:root /etc/systemd/system/druid*.service"
   config.vm.provision "shell", inline: "systemctl daemon-reload"
+  # download all deps in parallel on multiple VMs (better to do this here in parallel instead via RunWorkload.py); unit has a 5 Minute timeout so no timeout needed here
+  # without pre-downloading deps sometimes druid fails because deps cannot be resolved via maven (mostly in single vm cluster)
+  config.vm.provision "shell", inline: "systemctl start druid_repo.service"
+  config.vm.provision "shell", inline: "while [ $(($(systemctl status druid_repo.service | grep -c \"inactive\")-1)) -ne 0 ]; do sleep 5; done"
 end

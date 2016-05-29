@@ -58,7 +58,10 @@ def getDict():
                          "%%SSH%%sudo -s bash -c 'sed -i \"s|localhost|%%IP%%|g\" /home/vagrant/config/middleManager/runtime.properties'",
                          "%%SSH%%sudo -s bash -c 'sed -i \"s|localhost|%%IP%%|g\" /home/vagrant/config/overlord/runtime.properties'"]
     dbConfig["postrun"]= []
-    dbConfig["prerun_master"]= ["%%SSH%%sudo -s bash -c 'systemctl start druid.service'", "bash -c 'sleep 180'"]
+    dbConfig["prerun_master"]= [#"%%SSH%%sudo -s bash -c 'systemctl start druid_repo.service'",
+                                                    #"%%SSH%%sudo -s bash -c 'while [ $(($(systemctl status druid_repo.service | grep -c \"inactive\")-1)) -ne 0 ]; do sleep 5; done'",
+                                                    "%%SSH%%sudo -s bash -c 'systemctl start druid.service'",
+                                                    "bash -c 'sleep 180'"]
     dbConfig["postrun_master"]= []
     dbConfig["prerun_slaves"]= []
     dbConfig["postrun_slaves"]= []
@@ -66,6 +69,7 @@ def getDict():
     dbConfig["postrun_dict"]= {}
     dbConfig["check"]= []
     dbConfig["check_master"]= ["%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid.service | grep -c \"active (exited)\")-1))'",
+                        "%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_repo.service | grep -c \"inactive (dead)\")-1))'",
                         "%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_broker.service | grep -c \"active (exited)\")'",
                         "%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_broker.service | grep -c \"active (running)\")-1))'",
                         "%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_coordinator.service | grep -c \"active (exited)\")'",

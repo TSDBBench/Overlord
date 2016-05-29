@@ -79,15 +79,20 @@ def getDict():
     dbConfig["check_master"]= []
     dbConfig["check_slaves"]= []
     dbConfig["check_dict"]= {
-        0 : ["%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_coordinator.service | grep -c \"active (exited)\")'",
+        0 : ["%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_repo.service | grep -c \"inactive (dead)\")-1))'",
+             "%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_coordinator.service | grep -c \"active (exited)\")'",
              "%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_coordinator.service | grep -c \"active (running)\")-1))'"],
-        1 : ["%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_broker.service | grep -c \"active (exited)\")'",
+        1 : ["%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_repo.service | grep -c \"inactive (dead)\")-1))'",
+             "%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_broker.service | grep -c \"active (exited)\")'",
              "%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_broker.service | grep -c \"active (running)\")-1))'"],
-        2 : ["%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_historical.service | grep -c \"active (exited)\")'",
+        2 : ["%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_repo.service | grep -c \"inactive (dead)\")-1))'",
+             "%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_historical.service | grep -c \"active (exited)\")'",
              "%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_historical.service | grep -c \"active (running)\")-1))'"],
-        3 : ["%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_middlemanager.service | grep -c \"active (exited)\")'",
+        3 : ["%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_repo.service | grep -c \"inactive (dead)\")-1))'",
+             "%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_middlemanager.service | grep -c \"active (exited)\")'",
              "%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_middlemanager.service | grep -c \"active (running)\")-1))'"],
-        4 : ["%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_overlord.service | grep -c \"active (exited)\")'",
+        4 : ["%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_repo.service | grep -c \"inactive (dead)\")-1))'",
+             "%%SSH%%sudo -s bash -c 'exit $(systemctl status druid_overlord.service | grep -c \"active (exited)\")'",
              "%%SSH%%sudo -s bash -c 'exit $(($(systemctl status druid_overlord.service | grep -c \"active (running)\")-1))'"]
     }
     dbConfig["basic"]= False
