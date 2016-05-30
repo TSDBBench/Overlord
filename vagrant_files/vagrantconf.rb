@@ -76,7 +76,7 @@ $git_h5json = 'a85c6b195dc63687391f8e69be3f6d595679c0f5'
 $git_h5serv = '18709351fb173697e323eb62828cb8868f2e1db3'
 
 # hbase
-$links_hbase = 'http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist/hbase/1.1.4/hbase-1.1.4-bin.tar.gz'
+$links_hbase = 'http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist/hbase/1.1.5/hbase-1.1.5-bin.tar.gz'
 
 # influxdb
 # influxdb 0.12. and upwards does not support clustering anymore, see https://influxdata.com/blog/update-on-influxdb-clustering-high-availability-and-monetization/
