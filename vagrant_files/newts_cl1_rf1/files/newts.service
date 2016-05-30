@@ -3,7 +3,7 @@ Description=NewTS
 
 [Service]
 Type=forking
-ExecStart=/usr/bin/java -cp /home/vagrant/newts-1.3.1/lib/*: org.opennms.newts.rest.NewtsDaemon -D -p /var/run/newts.pid -c /home/vagrant/newts-1.3.1/etc/config.yaml
+ExecStart=/usr/bin/java -cp /home/vagrant/newts/lib/*: org.opennms.newts.rest.NewtsDaemon -D -p /var/run/newts.pid -c /home/vagrant/newts/etc/config.yaml
 PIDFile=/var/run/newts.pid
 
 [Install]
