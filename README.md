@@ -5,6 +5,42 @@ The Python and Vagrant part of TSDBBench
 
 The VMs are running on vSphere or Openstack, but you can choose to run TSDBBench.py on your local pc or on a Control VM.
 
+
+# Supported databases
+
+* Timeseries databases with a Requirement on NoSQL DBMS:
+  * [Axibase Time Series Database](docs/tsdb/axibase.md)
+  * [Blueflood](docs/tsdb/blueflood.md)
+  * [Databus](docs/tsdb/databus.md)
+  * [KairosDB](docs/tsdb/kairosdb.md)
+  * [NewTS](docs/tsdb/newts.md)
+  * [OpenTSDB](docs/tsdb/opentsdb.md)
+  * [Rhombus](docs/tsdb/rhombus.md)
+  * [Graphite](docs/tsdb/graphite.md)
+* Timeseries databases with no Requirement on any DBMS:
+  * [Akumuli](docs/tsdb/akumuli.md)
+  * [Druid](docs/tsdb/druid.md)
+  * [InfluxDB](docs/tsdb/influxdb.md)
+  * [Gnocchi](docs/tsdb/gnocchi.md)
+  * [Seriesly](docs/tsdb/seriesly.md)
+* Column-oriented DBMS
+  * [MonetDB](docs/tsdb/monetdb.md)
+  * [Kdb+](docs/tsdb/kdpplus.md)
+* Relational databases:
+  * [MySQL](docs/tsdb/mysql.md)
+  * [PostgreSQL](docs/tsdb/postgresql.md)
+* Other:
+  * [Elasticsearch](docs/tsdb/elasticsearch.md)
+  * [h5serv](docs/tsdb/h5serv.md)
+
+# Supported Elastic Infrastrctures
+
+  * [VMware vSphere](docs/ei/vsphere.md)
+  * [OpenStack](docs/ei/openstack.md)
+  * [VirtualBox](docs/virtualbox.md)
+  * [DigitalOcean](docs/digitalocean.md)
+  * [Amazon Web Services](docs/aws.md)
+
 ## Setup Elastic Infrastructure
 For your elastic infrastructure you need image(s) as bases for vagrant to derive generator and tsdb vms from. You can choose wheter you want to use vSohere or Openstack, you don't need both.
 
