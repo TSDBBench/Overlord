@@ -27,3 +27,6 @@
   * mvn package -P all-modules
   * The result (if the build process was successful) is in blueflood-all/target/blueflood-all-2.0.0-SNAPSHOT-jar-with-dependencies.jar
   * Go on with the [10 Minuten Guide](https://github.com/rackerlabs/blueflood/wiki/10minuteguide)
+
+
+[Back to README.md](../../README.md)
