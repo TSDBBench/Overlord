@@ -1,5 +1,5 @@
-# TSDBBench
-[![Build Status](https://api.travis-ci.org/TSDBBench/TSDBBench.svg?branch=master)](https://travis-ci.org/TSDBBench/TSDBBench)
+# TSDBBench: Overlord
+[![Build Status](https://api.travis-ci.org/TSDBBench/Overlord.svg?branch=master)](https://travis-ci.org/TSDBBench/Overlord)
 
 The Python and Vagrant part of TSDBBench
 
