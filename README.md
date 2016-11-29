@@ -68,7 +68,7 @@ Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. 
         cd /path/to/some/folder/
         git clone https://github.com/baderas/TSDBBench
         cd TSDBBench
-        vagrant box add --name dummy_openstack dummy_openstack.box
+        vagrant box add TSDBBench/tsdbbench_dummy.box --provider openstack
         copy hooks/pre-commit .git/hooks/
         cd ..
 6. Edit Config (change everything that says '')
