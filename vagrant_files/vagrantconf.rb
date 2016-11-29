@@ -22,7 +22,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     openstack.image              = ''
     openstack.floating_ip_pool   = ''
     openstack.openstack_image_url = ''
+    openstack.security_groups     = ['default','allow_all']
     override.vm.box_url = 'dummy_openstack.box'
+    # allow_all or default must at least provide SSH (22) ingress access!
   end
   config.vm.provider :virtualbox do |virtualbox, override|
     override.vm.box                = "tsdbbench-debian"
