@@ -33,13 +33,17 @@ The VMs are running on vSphere or Openstack, but you can choose to run TSDBBench
   * [Elasticsearch](docs/tsdb/elasticsearch.md)
   * [h5serv](docs/tsdb/h5serv.md)
 
+# Unsupported databases
+
+*  [DalmatinerDB](docs/tsdb/dalmatinerdb.md)
+
 # Supported Elastic Infrastrctures
 
-  * [VMware vSphere](docs/ei/vsphere.md)
-  * [OpenStack](docs/ei/openstack.md)
-  * [VirtualBox](docs/virtualbox.md)
-  * [DigitalOcean](docs/digitalocean.md)
-  * [Amazon Web Services](docs/aws.md)
+* [VMware vSphere](docs/ei/vsphere.md)
+* [OpenStack](docs/ei/openstack.md)
+* [VirtualBox](docs/virtualbox.md)
+* [DigitalOcean](docs/digitalocean.md)
+* [Amazon Web Services](docs/aws.md)
 
 ## Setup Elastic Infrastructure
 For your elastic infrastructure you need image(s) as bases for vagrant to derive generator and tsdb vms from. You can choose wheter you want to use vSohere or Openstack, you don't need both.
@@ -52,7 +56,7 @@ For your elastic infrastructure you need image(s) as bases for vagrant to derive
      - Copy http://nemarcontrolvm.iaas.uni-stuttgart.de/isos/debian-8.1.0-amd64-netinst-openstack-autoinstall.qcow2 to your images in Openstack
  - If you still want to create own images (changed preseed file e.g.) (run on your local pc):
    - for vSphere:
-          
+
             cd /path/to/another/folder/
             wget http://cdimage.debian.org/debian-cd/8.2.0/amd64/iso-cd/debian-8.2.0-amd64-netinst.iso
             cd /path/to/some/folder/
@@ -60,7 +64,7 @@ For your elastic infrastructure you need image(s) as bases for vagrant to derive
             cd TSDBBench
             ./MakeDebianIso.py -t /path/to/tmpfolder -i /path/to/another/folder/debian-8.2.0-amd64-netinst.iso -f /path/to/outputfolder/ -p preseed-vsphere.cfg
    - for Openstack
-   
+
             sudo apt-get install qemu-kvm libvirt-bin
             sudo gpasswd -a $USER kvm
             sudo gpasswd -a $USER libvirt
@@ -97,7 +101,7 @@ Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. 
         vagrant plugin install vagrant-vsphere
         vagrant plugin install vagrant-openstack-provider
 4. Reconfigure locales and make sure that en_US.UTF-8 is generated
-       
+
         sudo dpkg-reconfigure locales
 5. Checking out & Prepairing Git Repo
 
@@ -113,13 +117,13 @@ Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. 
         nano vagrant_files/vagrantconf.rb
         nano vagrant_files/vagrantconf_db.rb
         nano vagrant_files/vagrantconf_gen.rb
-        
+
 ### Choice 2: Control VM
   - Coming soon...
 
 ## Running a testworkload
  - without creating html file:
- 
+
         cd /path/to/some/folder/TSDBBench
         ./TSDBBench.py -t /path/to/tmpfolder -f /path/to/some/folder/TSDBBench/vagrant_files -d mysql1 -l --provider 'vsphere' -w "testworkloada"
  - with creating html file:
@@ -132,7 +136,7 @@ Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. 
 
         cd /path/to/some/folder/TSDBBench
         ./ProcessYcsbLog.py -f some_ycsb_logfile.log
-        
+
  - Creating a html file from a ycsb_*.ydc file:
 
         cd /path/to/some/folder/TSDBBench
@@ -142,20 +146,20 @@ Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. 
 
         cd /path/to/some/folder/TSDBBench
         ./ProcessYcsbLog.py -f some_ycsb_logfile1.ydc ome_ycsb_logfile2.log ome_ycsb_logfile3.ydc ...
-        
+
 ## Steps to add a new TSDB:
 for this example consider your new tsdb would be opentsdb:
   1. Add Vagrantfiles:
    1. Create at least one folder in /path/to/some/folder/TSDBBench/vagrant_files
       - e.g. opentsdb1
-   2. Create at least one Vagrantfile in this new folder 
+   2. Create at least one Vagrantfile in this new folder
       - named same as the folder but with _ + number + .vagrant as suffix
       - e.g. /path/to/some/folder/TSDBBench/vagrant_files/opentsdb1/opentsdb1_0
    3. In this Vagrantfile put deployment tasks like installing and configuring
       - but nothing where you need to know IPs from other nodes of the cluster (that comes later)
    4. Use basic scripts as much as possible
       - see /path/to/some/folder/TSDBBench/vagrant_files/basic
-  2. Add the python part 
+  2. Add the python part
    1. Add a python file to /path/to/some/folder/TSDBBench/databases
      - named like the folder + .py (.e.g. opentsdb1.py)
    2. In this file you add:
