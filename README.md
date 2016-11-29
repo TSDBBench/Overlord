@@ -49,7 +49,7 @@ For your elastic infrastructure you need image(s) as bases for vagrant to derive
 
 ## Setup
 Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. But Ubuntu has different package names for a lot of the packages, you need to find and change them!
-### Choice 1: local pc
+### Choice 1: local pc with openstack
 1. Install packages:
 
         sudo apt-get install python-dateutil python-jinja2 python-numpy python-pandas python-flask python-redis python-requests python-six python-tornado python-werkzeug python-markupsafe python-greenlet python-zmq python-yaml python-pip wkhtmltopdf python-magic fabric vagrant zlib1g-dev zlib1g libxml2 libxml2-dev libxslt1.1 libxslt1-dev python-webcolors python-pyvmomi
@@ -68,7 +68,7 @@ Everything was tested and used on Debian Jessie x64, but should work on Ubuntu. 
         cd /path/to/some/folder/
         git clone https://github.com/baderas/TSDBBench
         cd TSDBBench
-        vagrant box add --name dummy dummy.box
+        vagrant box add --name dummy_openstack dummy_openstack.box
         copy hooks/pre-commit .git/hooks/
         cd ..
 6. Edit Config (change everything that says '')

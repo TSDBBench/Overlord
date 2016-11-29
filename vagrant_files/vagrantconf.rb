@@ -12,6 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vsphere.user = ''
     vsphere.password = ''
     vsphere.insecure = true
+    override.vm.box_url = 'dummy_vsphere.box'
   end
   config.vm.provider :openstack do |openstack, override|
     openstack.openstack_auth_url = ''
@@ -21,6 +22,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     openstack.image              = ''
     openstack.floating_ip_pool   = ''
     openstack.openstack_image_url = ''
+    override.vm.box_url = 'dummy_openstack.box'
   end
   config.vm.provider :virtualbox do |virtualbox, override|
     override.vm.box                = "tsdbbench-debian"
@@ -36,6 +38,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     digitalocean.ipv6 = false
     digitalocean.setup = true
     digitalocean.backups_enabled = false
+    override.vm.box_url = 'dummy_do.box'
   end
   # You need to create a Security Group that allows traffic from your IP (at least) to port 22
   # In this example the security group is called "SSH"
@@ -60,6 +63,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     aws. ssh_host_attribute = :public_ip_address
     override.ssh.private_key_path = "~/.ssh/id_rsa"
     aws.user_data = File.read("aws_commands.txt")
+    override.vm.box_url = 'dummy_aws.box'
   end
 end
 
