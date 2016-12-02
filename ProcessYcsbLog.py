@@ -768,7 +768,7 @@ def generate_html(p, templateFile, templateDict, outputFile, overwrite, logger):
     except Exception, e:
         logger.error("Failed load template file '%s'" %(templateFile), exc_info=True)
         os._exit(-1)
-    html = bokeh.embed.file_html(plot_object=p, resources=bokeh.resources.INLINE, title=templateDict["title"] , template=template, template_variables=templateDict)
+    html = bokeh.embed.file_html(models=p, resources=bokeh.resources.INLINE, title=templateDict["title"] , template=template, template_variables=templateDict)
     if Util.check_file_exists(outputFile) and not overwrite:
         logger.error("Html file does exist: '%s'. Delete or use overwrite flag." %(outputFile))
         os._exit(-1)
