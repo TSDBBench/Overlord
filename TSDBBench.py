@@ -74,11 +74,17 @@ def wait_for_vm(vms, logger, timeout=3600, noshutdown=False):
         logger.error("DB VM Dict has zero keys.")
         return False
     keyOfFirst=sorted(vms.keys())[0]
-    while vms[keyOfFirst].vm.status()[0].state == "running":
-        time.sleep(10)
-        if time.clock()-timerBegin > 3600:
-            logger.error("VM % is still up, waiting for it to shutdown timeouted after %s seconds." %(Vm.hostname(),timeout))
-            return False
+    try:
+        while vms[keyOfFirst].vm.status()[0].state == "running":
+            time.sleep(10)
+            if time.clock()-timerBegin > 3600:
+                logger.error("VM % is still up, waiting for it to shutdown timeouted after %s seconds." %(Vm.hostname(),timeout))
+                return False
+    except IndexError:
+        logger.error("Python-Vagrant could not parse the output of vagrant status --machine-readable, try check it for "
+                     "yourself. The output should be parsable CSV. Sometimes the \"plugin outdated\" message causes "
+                     "this error. Check that all vagrant plugins are uptodate.", exc_info=True)
+        return False
     if noshutdown:
         logger.info("Noshutdown is activated, trying to boot it up again.")
         for vmKey in sorted(vms.keys()):
