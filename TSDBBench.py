@@ -420,7 +420,7 @@ for path, dir in Util.unsorted_paths(args.vagrantfolders,logger,"",True):
                         else:
                             virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                             virtMachine.start()
-                            Util.sleep_random(1.0,5.0)  # needed for openstack, otherwise two vms get the same floating ip
+                            Util.sleep_random(2.5,5.0)  # needed for openstack, otherwise two vms get the same floating ip
                             generators[virtMachine.name] = virtMachine
         if found == 0:
             logger.error("No .vagrant files found in %s." %(Util.unsorted_paths(args.vagrantfolders, logger, "generator")))
@@ -554,7 +554,7 @@ else:
                             else:
                                 virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                                 virtMachine.start()
-                                Util.sleep_random(1.0,5.0)  # needed for openstack, otherwise two vms get the same floating ip
+                                Util.sleep_random(2.5,5.0)  # needed for openstack, otherwise two vms get the same floating ip
                                 dbs[virtMachine.name] = virtMachine
             if args.linear:
                 creationTimesDB[dir] = datetime.datetime.now() - creationTimesDB[dir]
