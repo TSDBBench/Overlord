@@ -34,13 +34,19 @@ baseDbVmConfig={ "name" : "BaseDB-VM",
                  "ram" : 16384,
                  "hdd" : 50, #in GB
                  "network" : "VM Network IAAS",
-                 "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.1.0-amd64-netinst-autoinstall.iso"}
+                 "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.6.0-amd64-netinst-autoinstall.iso"}
 baseGenVmConfig={ "name" : "BaseGen-VM",
                   "cpu" : 4,
                   "ram" : 8192,
                   "hdd" : 50, #in GB
                   "network" : "VM Network IAAS",
-                  "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.1.0-amd64-netinst-autoinstall.iso"}
+                  "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.6.0-amd64-netinst-autoinstall.iso"}
+controlVmConfig={ "name" : "Control-VM",
+                  "cpu" : 8,
+                  "ram" : 8192,
+                  "hdd" : 50, #in GB
+                  "network" : "VM Network IAAS",
+                  "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.6.0-amd64-netinst-vsphere-controlvm-autoinstall.iso"}
 TestVmConfig={ "name" : "TEST",
                   "cpu" : 1,
                   "ram" : 1024,
@@ -48,7 +54,7 @@ TestVmConfig={ "name" : "TEST",
                   "network" : "VM Network IAAS",
                   "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.1.0-amd64-netinst-autoinstall.iso"}
 
-vmDictList = [baseGenVmConfig, baseDbVmConfig]
+vmDictList = [baseGenVmConfig, baseDbVmConfig, controlVmConfig]
 
 #######################################################################
 # Fix for not validated SSL Certs
