@@ -14,6 +14,8 @@ import atexit
 import time
 import datetime
 
+# install python-pyvmomi on Debian with apt-get
+
 # First: Default without template name
 # Second: Only Generator template name
 # Third: Only DB template name
