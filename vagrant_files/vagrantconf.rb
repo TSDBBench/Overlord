@@ -84,3 +84,7 @@ $links_hbase = 'http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist/
 # influxdb 0.12. and upwards does not support clustering anymore, see https://influxdata.com/blog/update-on-influxdb-clustering-high-availability-and-monetization/
 # It uses relay instead for high availability (clustering only in enterprise version)
 $links_influxdb = 'https://s3.amazonaws.com/influxdb/influxdb_0.11.1-1_amd64.deb'
+
+#prometheus
+$links_prometheus = 'https://github.com/prometheus/prometheus/releases/download/v1.5.0/prometheus-1.5.0.linux-amd64.tar.gz'
+$links_pushgateway = 'https://github.com/prometheus/pushgateway/releases/download/v0.3.1/pushgateway-0.3.1.linux-amd64.tar.gz'
