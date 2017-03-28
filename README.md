@@ -23,6 +23,7 @@ The VMs are running on vSphere or Openstack, but you can choose to run TSDBBench
   * [InfluxDB](docs/tsdb/influxdb.md)
   * [Gnocchi](docs/tsdb/gnocchi.md)
   * [Seriesly](docs/tsdb/seriesly.md)
+  * [Prometheus](docs/tsdb/prometheus.md)
 * Column-oriented DBMS
   * [MonetDB](docs/tsdb/monetdb.md)
   * [Kdb+](docs/tsdb/kdpplus.md)
