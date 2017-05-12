@@ -1,4 +1,4 @@
-# HDF5 (h5serv)
+# h5serv (HDF5)
 
 ## Links
 
