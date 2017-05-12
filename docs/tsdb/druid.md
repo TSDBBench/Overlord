@@ -4,7 +4,6 @@
 
 * http://druid.io/docs/latest/
 * http://druid.io/docs/0.8.0
-  * sometime things are missing in latest
 
 ## Information
 
@@ -28,18 +27,43 @@
     * Does not scale very well compared to Tranquility/Finagle ([souce](https://groups.google.com/forum/#!searchin/druid-development/fangjin$20yang$20%22thoughts%22/druid-development/aRMmNHQGdhI/muBGl0Xi_wgJ))
 * Supported query granularities:  none (ms when ms was ingested), minute, fifteen_minute, thirty_minute, hour, day, or all (one bucket) 
     
-    
 ## Implementation Notes
 
+* Using tranquility 0.4.2
+    * 0.5.0 does not work from Maven
+* No inserts into past possible, even with 1 year windowperiod and a fitting SegmentGranularity
+* Tagnames have to be deinfed as dimensions before using
+* SUM as aggregating function is available in two flavours: LongSum (for 64bit integer) and DoubleSum (for 64bit floating point)
+    * Using DoubleSum in TSDBBench, changable via flag
+* AVG is only available as post-aggregation function
+    * Uses SUM + Count as preceding functions
+* Replication of five is not possible in a five not cluster setup, since 5 historical nodes would be required.
+    * The idea of replication if to achieve a higher availabily (see https://groups.google.com/forum/#!topic/druid-development/0TBL5-3Z2PI)
 
+## Steps to setup Druids Cluster Wikipedia Example with Overload (for Tranquility)
+* Old:
+    * `wget http://static.druid.io/artifacts/releases/druid-0.8.0-bin.tar.gz`
+    * `tar -xvzf druid-0.8.0-bin.tar.gz`
+    * `sudo apt-get install zookeeperd mysql-server`
+    * `sudo systemctl start zookeeper.service`
+    * `cd druid-0.8.0`
+    * `mysql -uroot -e 'CREATE DATABASE druid DEFAULT CHARACTER SET utf8; GRANT ALL PRIVILEGES ON druid.* TO druid IDENTIFIED BY "diurd";'`
+    * `nano examples/wikipedia/wikipedia_realtime.spec`:
+        * "segmentGranularity": "HOUR", -> "segmentGranularity": "FIVE_MINUTE",
+        * "intermediatePersistPeriod": "PT10m", -> "intermediatePersistPeriod": "PT3m",
+        * "windowPeriod": "PT10m", -> "windowPeriod": "PT1m",
+* execute in parallel (can take some time when running the first time due to extension loading):
+    * `java -Xmx256m -Duser.timezone=UTC -Dfile.encoding=UTF-8 -classpath config/_common:config/coordinator:lib/* io.druid.cli.Main server coordinator`
+    * `java -Xmx256m -Duser.timezone=UTC -Dfile.encoding=UTF-8 -classpath config/_common:config/historical:lib/* io.druid.cli.Main server historical`
+    * `java -Xmx256m -Duser.timezone=UTC -Dfile.encoding=UTF-8 -classpath config/_common:config/broker:lib/* io.druid.cli.Main server broker`
+    * `java -Xmx256m -Duser.timezone=UTC -Dfile.encoding=UTF-8 -classpath config/_common:config/overlord:lib/* io.druid.cli.Main server overlord`
+* If a "real" Index Service is required:
+    * `java -Xms64m -Xmx64m -Duser.timezone=UTC -Dfile.encoding=UTF-8 -classpath config/_common:config/middlemanager:lib/* io.druid.cli.Main server middleManager`
+* New with script (2015-10-13):
+    * `sudo systemctl start zookeeper.service` (if not running)
+    * `./run.bash` 
 
-
-
-
-
-## Running the Wikipedia Cluster Example with Tranquility
-
-## Other important Links
+## Other Related Links
 
 * https://github.com/gianm/druid-monitorama-2015
 * https://github.com/jwang93/test-druid/wiki/MySQL-Setup
