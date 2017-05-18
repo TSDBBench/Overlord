@@ -33,9 +33,10 @@ The VMs are running on vSphere or Openstack, but you can choose to run TSDBBench
   * [Elasticsearch](docs/tsdb/elasticsearch.md)
   * [h5serv](docs/tsdb/h5serv.md)
 
-# Unsupported databases
+# Unsupported databases (WIP)
 
 *  [DalmatinerDB](docs/tsdb/dalmatinerdb.md)
+*  [ScyllaDB](docs/tsdb/scylladb.md)
 
 # Supported Elastic Infrastrctures
 

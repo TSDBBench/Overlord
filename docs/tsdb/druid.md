@@ -87,3 +87,5 @@
 * https://github.com/Quantiply/druid-vagrant
 * https://github.com/boneill42/druid-vagrant
 * http://www.datascienceassn.org/sites/default/files/users/user1/DruidDataIngest_0.6.62.pdf
+
+[Back to README.md](../../README.md)
