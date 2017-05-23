@@ -61,7 +61,7 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
 
 ## Initial Setup of local pc or Control-VM
 * To control TSDBBench, a local pc or a Control-VM (a VM with everything preinstalled) can be used (only vSphere and OpenStack)
-* Local PC:
+1. Local PC:
     1. Install packages:
         ```bash
         sudo apt-get install python-dateutil python-jinja2 python-numpy python-pandas python-flask python-redis python-requests python-six python-tornado python-werkzeug python-markupsafe python-greenlet python-zmq python-yaml python-pip wkhtmltopdf python-magic fabric vagrant zlib1g-dev zlib1g libxml2 libxml2-dev libxslt1.1 libxslt1-dev python-webcolors python-pyvmomi
@@ -87,11 +87,17 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
         copy hooks/pre-commit .git/hooks/
         cd ..
         ```
-* Control-VM
+    6. Edit Config for the chosen elastic infrastructure (change everything that says '' for your chosen elastic infrastructure)
+        ```bash
+        cd TSDBBench
+        nano vagrant_files/vagrantconf.rb
+        nano vagrant_files/vagrantconf_db.rb
+        nano vagrant_files/vagrantconf_gen.rb
+        ```
+2. Control-VM
     1. Create Control-VM according to [VMware vSphere](docs/ei/vsphere.md) or [OpenStack](docs/ei/openstack.md)
     2. Login to your Control-VM
-* Local PC and Control-VM:
-    1. Edit Config for the chosen elastic infrastructure (change everything that says '' for your chosen elastic infrastructure)
+    3. Edit Config for the chosen elastic infrastructure (change everything that says '' for your chosen elastic infrastructure)
         ```bash
         cd TSDBBench
         nano vagrant_files/vagrantconf.rb
