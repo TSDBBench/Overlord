@@ -74,11 +74,17 @@ def wait_for_vm(vms, logger, timeout=3600, noshutdown=False):
         logger.error("DB VM Dict has zero keys.")
         return False
     keyOfFirst=sorted(vms.keys())[0]
-    while vms[keyOfFirst].vm.status()[0].state == "running":
-        time.sleep(10)
-        if time.clock()-timerBegin > 3600:
-            logger.error("VM % is still up, waiting for it to shutdown timeouted after %s seconds." %(Vm.hostname(),timeout))
-            return False
+    try:
+        while vms[keyOfFirst].vm.status()[0].state == "running":
+            time.sleep(10)
+            if time.clock()-timerBegin > 3600:
+                logger.error("VM % is still up, waiting for it to shutdown timeouted after %s seconds." %(Vm.hostname(),timeout))
+                return False
+    except IndexError:
+        logger.error("Python-Vagrant could not parse the output of vagrant status --machine-readable, try check it for "
+                     "yourself. The output should be parsable CSV. Sometimes the \"plugin outdated\" message causes "
+                     "this error. Check that all vagrant plugins are uptodate.", exc_info=True)
+        return False
     if noshutdown:
         logger.info("Noshutdown is activated, trying to boot it up again.")
         for vmKey in sorted(vms.keys()):
@@ -414,7 +420,7 @@ for path, dir in Util.unsorted_paths(args.vagrantfolders,logger,"",True):
                         else:
                             virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                             virtMachine.start()
-                            Util.sleep_random(1.0,5.0)  # needed for openstack, otherwise two vms get the same floating ip
+                            Util.sleep_random(2.5,5.0)  # needed for openstack, otherwise two vms get the same floating ip
                             generators[virtMachine.name] = virtMachine
         if found == 0:
             logger.error("No .vagrant files found in %s." %(Util.unsorted_paths(args.vagrantfolders, logger, "generator")))
@@ -548,7 +554,7 @@ else:
                             else:
                                 virtMachine =  Vm.Vm(args.vagrantfolders, vagrantCredFiles, vagrantBasicFilesFolder, args.tmpfolder, split[0], logger, args.provider, args.log)
                                 virtMachine.start()
-                                Util.sleep_random(1.0,5.0)  # needed for openstack, otherwise two vms get the same floating ip
+                                Util.sleep_random(2.5,5.0)  # needed for openstack, otherwise two vms get the same floating ip
                                 dbs[virtMachine.name] = virtMachine
             if args.linear:
                 creationTimesDB[dir] = datetime.datetime.now() - creationTimesDB[dir]

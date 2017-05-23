@@ -418,7 +418,7 @@ def process_file(filename, timeSeries, fileDict, compressedFileName, logger):
     return fileDict
 
 # replaces bokeh.charts.Bar because it can't do logarithmic scale
-def generate_bar_plot(dataDict, cat, legendPos, title, ylabel, xlabel, width, height, logger):
+def generate_bar_plot(dataDict, cat, legendPos, legendOri, title, ylabel, xlabel, width, height, logger):
     maxValue=0
     for dataKey in dataDict.keys():
         for dataPoint in dataDict[dataKey]:
@@ -489,7 +489,8 @@ def generate_bar_plot(dataDict, cat, legendPos, title, ylabel, xlabel, width, he
     p.yaxis.axis_label = ylabel
     p.xaxis.axis_label = xlabel
     #p.y_range = (0, 10000)
-    p.legend.orientation = legendPos
+    p.legend.location = legendPos
+    p.legend.orientation = legendOri
     return p
 
 # generates plots for every block/index in dict
@@ -525,7 +526,7 @@ def generate_plot_single(dict, timeseries, logger, tick=1000):
     #     ylabel='Latency in ms', xlabel = "Type of latency", width=650, height=350)
     if args.debug:
         Util.log_timestamp("Start Generating bar plot",logger)
-    p = generate_bar_plot(dataDict["general"]["data"], dataDict["general"]["cat"], "top_left", "Block results:",
+    p = generate_bar_plot(dataDict["general"]["data"], dataDict["general"]["cat"], "top_left", "horizontal", "Block results:",
                           "Latency in ms", "Type of latency", 650, 350, logger)
     if args.debug:
         Util.log_timestamp("End Generating bar plot",logger)
@@ -622,7 +623,7 @@ def generate_plot_multi(dicts, timeseries, logger, tick=1000):
         # dataDictBlocks[blockKey]["cat"]=['Avg.', '95Perc.', '99Perc.',  'Min', 'Max',]
         # p = generate_bar_plot(dataDictBlocks[blockKey]["data"], dataDictBlocks[blockKey]["cat"][::-1],
         p = generate_bar_plot(dataDictBlocks[blockKey]["data"], dataDictBlocks[blockKey]["cat"],
-                              "top_left", "Results for block %s:" % (blockKey),
+                              "top_left", "horizontal", "Results for block %s:" % (blockKey),
                               "Latency in ms", "Type of latency", 1300, 700, logger)
         if p != None:
             gridplotList.append([p])
@@ -641,7 +642,7 @@ def generate_plot_multi(dicts, timeseries, logger, tick=1000):
     #         title = "Results for runtime:", ylabel = 'Runtime in ms', xlabel = "Type of runtime", width=1300, height=700)
     # gridplotList.append([p])
     p = generate_bar_plot(runtimeDict["data"], runtimeDict["cat"],
-                          "top_left", "Results for runtime:",
+                          "top_left", "horizontal", "Results for runtime:",
                           "Runtime in ms", "Type of runtime", 1300, 700, logger)
     if p != None:
         gridplotList.append([p])
@@ -661,7 +662,7 @@ def generate_plot_multi(dicts, timeseries, logger, tick=1000):
     #         title = "Results for throughput:", ylabel = 'Throughput in operations per sec.', xlabel = "Type of throughput", width=1300, height=700)
     # gridplotList.append([p])
     p = generate_bar_plot(runtimeDict["data"], runtimeDict["cat"],
-                          "top_left", "Results for throughput:",
+                          "top_left", "horizontal", "Results for throughput:",
                           "Throughput in operations per sec.", "Type of throughput", 1300, 700, logger)
     if p != None:
         gridplotList.append([p])
@@ -687,7 +688,7 @@ def generate_plot_multi(dicts, timeseries, logger, tick=1000):
     #         title = "Results for space consumption:", ylabel = 'Space consumption in Kilobyte (kB)', xlabel = "Type of space consumption", width=1300, height=700)
     # gridplotList.append([p])
     p = generate_bar_plot(runtimeDict["data"], runtimeDict["cat"],
-                          "top_left", "Results for space consumption:",
+                          "top_left", "horizontal", "Results for space consumption:",
                           "Space consumption in Kilobyte (kB)", "Type of space consumption", 1300, 700, logger)
     if p != None:
         gridplotList.append([p])
@@ -767,7 +768,7 @@ def generate_html(p, templateFile, templateDict, outputFile, overwrite, logger):
     except Exception, e:
         logger.error("Failed load template file '%s'" %(templateFile), exc_info=True)
         os._exit(-1)
-    html = bokeh.embed.file_html(plot_object=p, resources=bokeh.resources.INLINE, title=templateDict["title"] , template=template, template_variables=templateDict)
+    html = bokeh.embed.file_html(models=p, resources=bokeh.resources.INLINE, title=templateDict["title"] , template=template, template_variables=templateDict)
     if Util.check_file_exists(outputFile) and not overwrite:
         logger.error("Html file does exist: '%s'. Delete or use overwrite flag." %(outputFile))
         os._exit(-1)

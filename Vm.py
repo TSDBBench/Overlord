@@ -63,7 +63,10 @@ class Vm():
             try:
                 if self.vm.status()[0].state == vagrant.Vagrant.RUNNING:
                     self.vm.halt()
-                if self.vm.status()[0].state != vagrant.Vagrant.POWEROFF:
+                startTime = int(time.time())
+                while self.vm.status()[0].state == "powering-off" and (int(time.time()) - startTime) < 60 :
+                    time.sleep(1)
+                if self.vm.status()[0].state != vagrant.Vagrant.POWEROFF and self.vm.status()[0].state != vagrant.Vagrant.SHUTOFF:
                     self.vm.halt(force=True)
                 return self.vm.destroy()
             except subprocess.CalledProcessError:

@@ -14,6 +14,8 @@ import atexit
 import time
 import datetime
 
+# install python-pyvmomi on Debian with apt-get
+
 # First: Default without template name
 # Second: Only Generator template name
 # Third: Only DB template name
@@ -34,13 +36,19 @@ baseDbVmConfig={ "name" : "BaseDB-VM",
                  "ram" : 16384,
                  "hdd" : 50, #in GB
                  "network" : "VM Network IAAS",
-                 "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.1.0-amd64-netinst-autoinstall.iso"}
+                 "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.6.0-amd64-netinst-vsphere-autoinstall.iso"}
 baseGenVmConfig={ "name" : "BaseGen-VM",
                   "cpu" : 4,
                   "ram" : 8192,
                   "hdd" : 50, #in GB
                   "network" : "VM Network IAAS",
-                  "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.1.0-amd64-netinst-autoinstall.iso"}
+                  "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.6.0-amd64-netinst-vsphere-autoinstall.iso"}
+controlVmConfig={ "name" : "Control-VM",
+                  "cpu" : 8,
+                  "ram" : 8192,
+                  "hdd" : 50, #in GB
+                  "network" : "VM Network IAAS",
+                  "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.6.0-amd64-netinst-vsphere-controlvm-autoinstall.iso"}
 TestVmConfig={ "name" : "TEST",
                   "cpu" : 1,
                   "ram" : 1024,
@@ -48,7 +56,7 @@ TestVmConfig={ "name" : "TEST",
                   "network" : "VM Network IAAS",
                   "iso" : "[dsNEMAR_NFS_nemarcontrolvm_v2] debian-8.1.0-amd64-netinst-autoinstall.iso"}
 
-vmDictList = [baseGenVmConfig, baseDbVmConfig]
+vmDictList = [baseGenVmConfig, baseDbVmConfig, controlVmConfig]
 
 #######################################################################
 # Fix for not validated SSL Certs
@@ -295,31 +303,39 @@ def clone_vm_to_template(vm, destFolder, name, logger):
         return False
     return True
 
-def search_vm_by_name(name, vmFolder, depth=1):
+def search_vm_by_name(name, vmFolder, comparisonPath, path="", depth=1):
     maxdepth=10
     vmList=[]
     if hasattr(vmFolder, 'childEntity'):
         if depth > maxdepth:
             return []
         for child in vmFolder.childEntity:
-            found = search_vm_by_name(name,child,depth+1)
+            newPath=""
+            if path=="":
+                newPath = "%s" %(vmFolder.name)
+            else:
+                newPath = path+"/%s" %(vmFolder.name)
+            found = search_vm_by_name(name, child, comparisonPath, newPath, depth+1)
             if found != None and found != []:
                 for element in found:
                     vmList.append(element)
-
     else:
-        if vmFolder.name.lower() == name.lower():
+        if vmFolder.name.lower() == name.lower() \
+                and "%s/%s".lower() %("".join(path.split("vm/")[1:]),vmFolder.name) == "%s/%s".lower() %(comparisonPath,name):
             return [vmFolder]
         else:
             return []
     return vmList
 
-def check_if_exist(name,vmFolder, logger):
-    res = search_vm_by_name(name,vmFolder)
+def check_if_exist(name, path, vmFolder, logger):
+    res = search_vm_by_name(name, vmFolder, path)
+    # for element in res:
+    #    if "".join(element.summary.config.vmPathName.split(" ")[1].split(".")[:-1]).lower() != path:
+    #        res.pop(element)
     if res == None or len(res) <= 0:
         return None
     if len(res) > 1:
-        logger.warning("Found more than 1 VM with name %s." %(name))
+        logger.warning("Found more than 1 VM with name %s in path %s." %(name,path))
     return res[0]
 
 def power_on_vm(vm, logger):
@@ -494,7 +510,7 @@ try:
     # print destfolder.name
     for vmDict in vmDictList:
         for vmName in [vmDict["name"], "%s-Vorlage" %(vmDict["name"])]:
-            vm = check_if_exist(vmName, dc.vmFolder, logger)
+            vm = check_if_exist(vmName, vsphereConfigDict["vm_base_path"], dc.vmFolder, logger)
             if vm != None:
                 if not args.overwrite:
                     logger.error("VM '%s' already exists, overwrite not enabled." %(vm.name))
