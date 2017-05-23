@@ -1,0 +1,20 @@
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # Installing prometheus
+  config.vm.provision "shell", privileged: false, inline: "wget -t 10 -O /home/vagrant/prometheus.tar.gz --retry-connrefused -nv \"#{$links_prometheus}\""
+  config.vm.provision "shell", privileged: false, inline: "wget -t 10 -O /home/vagrant/pushgateway.tar.gz --retry-connrefused -nv \"#{$links_pushgateway}\""
+  config.vm.provision "shell", privileged: false,  inline: "tar -C /home/vagrant -xvzf /home/vagrant/prometheus.tar.gz"
+  config.vm.provision "shell", privileged: false,  inline: "tar -C /home/vagrant -xvzf /home/vagrant/pushgateway.tar.gz"
+  config.vm.provision "shell", privileged: false,  inline: "rm /home/vagrant/prometheus.tar.gz"
+  config.vm.provision "shell", privileged: false,  inline: "rm /home/vagrant/pushgateway.tar.gz"
+  config.vm.provision "shell", privileged: false,  inline: "mv /home/vagrant/prometheus-* /home/vagrant/prometheus"
+  config.vm.provision "shell", privileged: false,  inline: "mv /home/vagrant/pushgateway-* /home/vagrant/pushgateway"
+  config.vm.provision "shell", privileged: false,  inline: "rm -rf /home/vagrant/prometheus-*"
+  config.vm.provision "shell", privileged: false,  inline: "rm -rf /home/vagrant/pushgateway-*"
+  config.vm.provision "shell", privileged: false,  inline: "rm /home/vagrant/prometheus/prometheus.yml"
+  config.vm.provision "shell", inline: "cp /vagrant/files/prometheus.yml /home/vagrant/prometheus/prometheus.yml"
+  config.vm.provision "shell", inline: "cp /vagrant/files/prometheus.service /etc/systemd/system/"
+  config.vm.provision "shell", inline: "cp /vagrant/files/pushgateway.service /etc/systemd/system/"
+  config.vm.provision "shell", inline: "chown root:root /etc/systemd/system/prometheus.service"
+  config.vm.provision "shell", inline: "chown root:root /etc/systemd/system/pushgateway.service"
+  config.vm.provision "shell", inline: "systemctl daemon-reload" 
+end

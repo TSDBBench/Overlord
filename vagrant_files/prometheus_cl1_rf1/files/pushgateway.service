@@ -1,0 +1,8 @@
+[Unit]
+Description=Pushgateway
+
+[Service]
+ExecStart=/home/vagrant/pushgateway/pushgateway
+
+[Install]
+WantedBy=multi-user.target
