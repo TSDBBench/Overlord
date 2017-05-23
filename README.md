@@ -63,36 +63,48 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
 * To control TSDBBench, a local pc or a Control-VM (a VM with everything preinstalled) can be used (only vSphere and OpenStack)
 * Local PC:
     1. Install packages:
-        `sudo apt-get install python-dateutil python-jinja2 python-numpy python-pandas python-flask python-redis python-requests python-six python-tornado python-werkzeug python-markupsafe python-greenlet python-zmq python-yaml python-pip wkhtmltopdf python-magic fabric vagrant zlib1g-dev zlib1g libxml2 libxml2-dev libxslt1.1 libxslt1-dev python-webcolors python-pyvmomi`
+        ```bash
+        sudo apt-get install python-dateutil python-jinja2 python-numpy python-pandas python-flask python-redis python-requests python-six python-tornado python-werkzeug python-markupsafe python-greenlet python-zmq python-yaml python-pip wkhtmltopdf python-magic fabric vagrant zlib1g-dev zlib1g libxml2 libxml2-dev libxslt1.1 libxslt1-dev python-webcolors python-pyvmomi
+        ```
     2. Install pip packages:
-        `sudo pip install bokeh python-vagrant pdfkit`
+        ```bash
+        sudo pip install bokeh python-vagrant pdfkit
+        ```
     3. Install vagrant plugins:
-        `vagrant plugin install vagrant-vsphere`
-        `vagrant plugin install vagrant-openstack-provider`
+        ```bashvagrant plugin install vagrant-vsphere
+        vagrant plugin install vagrant-openstack-provider
+        ```
     4. Reconfigure locales and make sure that en_US.UTF-8 is generated
-        `sudo dpkg-reconfigure locales`
+        ```bash
+        sudo dpkg-reconfigure locales
+        ```
     5. Checking out & Prepairing Git Repo
-        `cd /path/to/some/folder/`
-        `git clone https://github.com/baderas/TSDBBench`
-        `cd TSDBBench`
-        `vagrant box add --name dummy dummy.box`
-        `copy hooks/pre-commit .git/hooks/`
-        `cd ..`
+        ```bash
+        cd /path/to/some/folder/
+        git clone https://github.com/baderas/TSDBBench
+        cd TSDBBench
+        vagrant box add --name dummy dummy.box
+        copy hooks/pre-commit .git/hooks/
+        cd ..
+        ```
 * Control-VM
     1. Create Control-VM according to [VMware vSphere](docs/ei/vsphere.md) or [OpenStack](docs/ei/openstack.md)
     2. Login to your Control-VM
 * Local PC and Control-VM:
     1. Edit Config for the chosen elastic infrastructure (change everything that says '' for your chosen elastic infrastructure)
-        `cd TSDBBench`
-        `nano vagrant_files/vagrantconf.rb`
-        `nano vagrant_files/vagrantconf_db.rb`
-        `nano vagrant_files/vagrantconf_gen.rb`
+        ```bash
+        cd TSDBBench
+        nano vagrant_files/vagrantconf.rb
+        nano vagrant_files/vagrantconf_db.rb
+        nano vagrant_files/vagrantconf_gen.rb
+        ```
 
 ## Running a testworkload
- - without creating html file:
-    ```cd TSDBBench
+ - without creation of html file:
+    ```bash
+    cd TSDBBench
     ./TSDBBench.py -t /path/to/tmpfolder -f vagrant_files -d mysql_cl1_rf1 -l --provider 'vsphere' -w "testworkloada"```
- - with creating html file:
+ - with creation of html file:
     ```bash
     cd /path/to/some/folder/TSDBBench
     ./TSDBBench.py -t /path/to/tmpfolder -f /path/to/some/folder/TSDBBench/vagrant_files -d mysql1 -l --provider 'vsphere' -w "testworkloada" -m```
