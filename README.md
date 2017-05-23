@@ -146,6 +146,6 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
 * See [Adding a New Database](dev/adding_database.md) for howto add a new database
 
 ## Related Work
-* [Andreas Bader - Comparison of TSDBs](http://ftp.informatik.uni-stuttgart.de/pub/library/medoc.ustuttgart_fi/DIP-3729/DIP-3729.pdf)
-* [Andreas Bader, Oliver Kopp, Michael Falkenthal - Survey and Comparison of Open Source TSDBs](ftp://ftp.informatik.uni-stuttgart.de/pub/library/ncstrl.ustuttgart_fi/INPROC-2017-06/INPROC-2017-06.pdf)
+* [Comparison of TSDBs (Andreas Bader)](http://www2.informatik.uni-stuttgart.de/cgi-bin/NCSTRL/NCSTRL_view.pl?id=DIP-3729&mod=0&engl=0&inst=FAK)
+* [Survey and Comparison of Open Source TSDBs (Andreas Bader, Oliver Kopp, Michael Falkenthal)](http://www2.informatik.uni-stuttgart.de/cgi-bin/NCSTRL/NCSTRL_view.pl?id=INPROC-2017-06&mod=0&engl=0&inst=IPVS)
 * [Ultimate Comparison of TSDBs](https://tsdbbench.github.io/Ultimate-TSDB-Comparison/)
