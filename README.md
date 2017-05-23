@@ -143,7 +143,7 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
 
 ## Development Information
 * Development specific details on databases and elastic infrastructures can be found on their specific files (see links at the beginning)
-* [Adding a New Database](dev/adding_database.md)
+* [Adding a New Database](docs/dev/adding_database.md)
 
 ## Related Work
 * [Comparison of TSDBs (Andreas Bader)](http://www2.informatik.uni-stuttgart.de/cgi-bin/NCSTRL/NCSTRL_view.pl?id=DIP-3729&mod=0&engl=0&inst=FAK)
