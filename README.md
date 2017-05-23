@@ -87,7 +87,7 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
         copy hooks/pre-commit .git/hooks/
         cd ..
         ```
-    6. Edit Config for the chosen elastic infrastructure (change everything that says '' for your chosen elastic infrastructure)
+    6. Edit config for the chosen elastic infrastructure (change everything that says '' for your chosen elastic infrastructure)
         ```bash
         cd TSDBBench
         nano vagrant_files/vagrantconf.rb
@@ -97,7 +97,7 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
 2. Control-VM
     1. Create Control-VM according to [VMware vSphere](docs/ei/vsphere.md) or [OpenStack](docs/ei/openstack.md)
     2. Login to your Control-VM
-    3. Edit Config for the chosen elastic infrastructure (change everything that says '' for your chosen elastic infrastructure)
+    3. Edit config for the chosen elastic infrastructure (change everything that says '' for your chosen elastic infrastructure)
         ```bash
         cd TSDBBench
         nano vagrant_files/vagrantconf.rb
@@ -109,58 +109,43 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
  - without creation of html file:
     ```bash
     cd TSDBBench
-    ./TSDBBench.py -t /path/to/tmpfolder -f vagrant_files -d mysql_cl1_rf1 -l --provider 'vsphere' -w "testworkloada"```
+    ./TSDBBench.py -t /path/to/some/tmpfolder -f vagrant_files -d mysql_cl1_rf1 --provider 'vsphere' -w "testworkloada" -l```
  - with creation of html file:
     ```bash
-    cd /path/to/some/folder/TSDBBench
-    ./TSDBBench.py -t /path/to/tmpfolder -f /path/to/some/folder/TSDBBench/vagrant_files -d mysql1 -l --provider 'vsphere' -w "testworkloada" -m```
-
+    cd TSDBBench
+    ./TSDBBench.py -t /path/to/some/tmpfolder -f vagrant_files -d mysql_cl1_rf1 --provider 'vsphere' -w "testworkloada" -l -m```
+ - with creation of html files and multiple databases:
+    ```bash
+    cd TSDBBench
+    ./TSDBBench.py -t /path/to/some/tmpfolder -f vagrant_files -d mysql_cl1_rf1 postgresql_cl1_rf1 --provider 'vsphere' -w "testworkloada" -l -m --provider "vsphere"```
+    
 ## Creating html files (when not using -m)
  - Creating a html file from a ycsb_*.log file:
-
-        cd /path/to/some/folder/TSDBBench
-        ./ProcessYcsbLog.py -f some_ycsb_logfile.log
-
+    ```bash
+    cd TSDBBench
+    ./ProcessYcsbLog.py -f some_ycsb_logfile.log
+    ```
  - Creating a html file from a ycsb_*.ydc file:
-
-        cd /path/to/some/folder/TSDBBench
-        ./ProcessYcsbLog.py -f some_ycsb_logfile.ydc
-
+    ```bash
+    cd TSDBBench
+    ./ProcessYcsbLog.py -f some_ycsb_logfile.ydc
+    ```
  - Creating a combined html file a set of from a ycsb_*.ydc/.log files:
-
-        cd /path/to/some/folder/TSDBBench
-        ./ProcessYcsbLog.py -f some_ycsb_logfile1.ydc ome_ycsb_logfile2.log ome_ycsb_logfile3.ydc ...
-        
+    ```bash
+    cd TSDBBench
+    ./ProcessYcsbLog.py -f some_ycsb_logfile1.ydc ome_ycsb_logfile2.log ome_ycsb_logfile3.ydc ...
+    ```
+    
 ## Additional Information
 * Everything was tested and used on Debian Jessie x64, but should work on Ubuntu.
     * Ubuntu has different package names for a lot of the packages, you need to find and change them
+* Logfiles/Benchmark Results are stored compressed as .ydc Files 
 
-## Steps to add a new TSDB:
-for this example consider your new tsdb would be opentsdb:
-  1. Add Vagrantfiles:
-   1. Create at least one folder in /path/to/some/folder/TSDBBench/vagrant_files
-      - e.g. opentsdb1
-   2. Create at least one Vagrantfile in this new folder
-      - named same as the folder but with _ + number + .vagrant as suffix
-      - e.g. /path/to/some/folder/TSDBBench/vagrant_files/opentsdb1/opentsdb1_0
-   3. In this Vagrantfile put deployment tasks like installing and configuring
-      - but nothing where you need to know IPs from other nodes of the cluster (that comes later)
-   4. Use basic scripts as much as possible
-      - see /path/to/some/folder/TSDBBench/vagrant_files/basic
-  2. Add the python part
-   1. Add a python file to /path/to/some/folder/TSDBBench/databases
-     - named like the folder + .py (.e.g. opentsdb1.py)
-   2. In this file you add:
-     1. Deployment tasks that requires IPs from all nodes of the cluster
-     2. Checks that the database is running
-     3. Some basic db configs (everything that starts with db_)
-   3. Look at other database python files, there are comments that explain every field in every file
-  3. Testing
-   - You need to copy the database files to /path/to/some/folder/TSDBBench/vagrant_files/generator/files/databases/
-   - You can run either run "hooks/pre-commit" or "git commit -a" (runs the hook as well if setup correctly).
+## Development Information
+* Development specific details on databases and elastic infrastructures can be found on their specific files (see links at the beginning)
+* See [Adding a New Database](dev/adding_database.md) for howto add a new database
 
 ## Related Work
-
-*
-*
-*
+* [Comparison of TSDBs (Andreas Bader)](ftp://ftp.informatik.uni-stuttgart.de/pub/library/medoc.ustuttgart_fi/DIP-3729/DIP-3729.pdf)
+* [Survey and Comparison of Open Source TSDBs (Andreas Bader, Oliver Kopp, Michael Falkenthal](ftp://ftp.informatik.uni-stuttgart.de/pub/library/ncstrl.ustuttgart_fi/INPROC-2017-06/INPROC-2017-06.pdf)
+* [Ultimate Comparison of TSDBs] (https://tsdbbench.github.io/Ultimate-TSDB-Comparison/)
