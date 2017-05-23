@@ -11,7 +11,7 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
 
 ## Supported databases
 * Timeseries databases with a Requirement on NoSQL DBMS:
-  * [Axibase Time Series Database](docs/tsdb/axibase.md)
+  * [Axibase](docs/tsdb/axibase.md)
   * [Blueflood](docs/tsdb/blueflood.md)
   * [Databus](docs/tsdb/databus.md)
   * [KairosDB](docs/tsdb/kairosdb.md)
