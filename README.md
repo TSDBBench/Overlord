@@ -147,5 +147,5 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
 
 ## Related Work
 * [Comparison of TSDBs (Andreas Bader)](ftp://ftp.informatik.uni-stuttgart.de/pub/library/medoc.ustuttgart_fi/DIP-3729/DIP-3729.pdf)
-* [Survey and Comparison of Open Source TSDBs (Andreas Bader, Oliver Kopp, Michael Falkenthal](ftp://ftp.informatik.uni-stuttgart.de/pub/library/ncstrl.ustuttgart_fi/INPROC-2017-06/INPROC-2017-06.pdf)
-* [Ultimate Comparison of TSDBs] (https://tsdbbench.github.io/Ultimate-TSDB-Comparison/)
+* [Survey and Comparison of Open Source TSDBs (Andreas Bader, Oliver Kopp, Michael Falkenthal)](ftp://ftp.informatik.uni-stuttgart.de/pub/library/ncstrl.ustuttgart_fi/INPROC-2017-06/INPROC-2017-06.pdf)
+* [Ultimate Comparison of TSDBs](https://tsdbbench.github.io/Ultimate-TSDB-Comparison/)
