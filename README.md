@@ -93,7 +93,8 @@ The benchmark is done with [YCSB-TS](https://github.com/TSDBBench/YCSB-TS).
     ```cd TSDBBench
     ./TSDBBench.py -t /path/to/tmpfolder -f vagrant_files -d mysql_cl1_rf1 -l --provider 'vsphere' -w "testworkloada"```
  - with creating html file:
-    ```cd /path/to/some/folder/TSDBBench
+    ```bash
+    cd /path/to/some/folder/TSDBBench
     ./TSDBBench.py -t /path/to/tmpfolder -f /path/to/some/folder/TSDBBench/vagrant_files -d mysql1 -l --provider 'vsphere' -w "testworkloada" -m```
 
 ## Creating html files (when not using -m)
