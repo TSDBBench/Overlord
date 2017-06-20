@@ -23,8 +23,8 @@
     5. `cd /path/to/another/folder/`
     6. `wget http://cdimage.debian.org/debian-cd/8.8.0/amd64/iso-cd/debian-8.8.0-amd64-netinst.iso`
     7. `cd /path/to/some/folder/`
-    8. `git clone https://github.com/baderas/TSDBBench`
-    9. `cd TSDBBench`
+    8. `git clone https://github.com/TSDBBench/Overlord`
+    9. `cd Overlord`
     10. `./MakeDebianIso.py -t /path/to/tmpfolder -i /path/to/another/folder/debian-8.8.0-amd64-netinst.iso -f /path/to/outputfolder/ -p preseed-openstack.cfg`
     11. `./MakeDebianQcow2.py -i /path/to/outputfolder/debian-8.8.0-amd64-netinst-openstack-autoinstall.iso -f /path/to/outputfolder/`
     12. Upload the resulting file to your Openstack Storage
@@ -37,8 +37,8 @@
 5. `cd /path/to/another/folder/`
 6. `wget http://cdimage.debian.org/debian-cd/8.8.0/amd64/iso-cd/debian-8.8.0-amd64-netinst.iso`
 7. `cd /path/to/some/folder/`
-8. `git clone https://github.com/baderas/TSDBBench`
-9. `cd TSDBBench`
+8. `git clone https://github.com/TSDBBench/Overlord`
+9. `cd Overlord`
 10. `./MakeDebianIso.py -t /path/to/tmpfolder -i /path/to/another/folder/debian-8.8.0-amd64-netinst.iso -f /path/to/outputfolder/ -p preseed-openstack-controlvm.cfg`
 11. `./MakeDebianQcow2.py -i /path/to/outputfolder/debian-8.8.0-amd64-netinst-openstack-controlvm-autoinstall.iso -f /path/to/outputfolder/`
 12. Upload the resulting file to your Openstack Storage
