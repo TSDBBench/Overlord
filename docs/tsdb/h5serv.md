@@ -70,4 +70,4 @@
 * http://www.pytables.org/usersguide/libref/structured_storage.html#tables.Table.where
 * https://code.google.com/archive/p/numexpr/
 
-[Back to README.md](../../README.md)
+[back](../../)

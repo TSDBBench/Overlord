@@ -30,4 +30,4 @@
 * Go on with the [10 Minuten Guide](https://github.com/rackerlabs/blueflood/wiki/10minuteguide)
 
 
-[Back to README.md](../../README.md)
+[back](../../)

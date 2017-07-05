@@ -23,4 +23,5 @@
       * E.g., TSDBBench/vagrant_files/generator/files/databases/opentsdb_cl1_rf1.py
   3. Add a Client (if not existing) to YCSB-TS
     * See https://github.com/TSDBBench/YCSB-TS
-[Back to README.md](../../README.md)
+
+[back](../)

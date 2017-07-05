@@ -6,4 +6,4 @@
 * https://www.infoq.com/articles/redis-time-series
 * https://redis.io/
 
-[Back to README.md](../../README.md)
+[back](../../)

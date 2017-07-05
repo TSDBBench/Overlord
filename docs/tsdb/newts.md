@@ -35,4 +35,4 @@
 * https://github.com/OpenNMS/newts/wiki/JavaAPI
 * https://github.com/OpenNMS/newts/wiki/UsingJava
 
-[Back to README.md](../../README.md)
+[back](../../)

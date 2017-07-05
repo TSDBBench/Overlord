@@ -44,4 +44,4 @@
 6. `./MakeDebianIso.py -t /path/to/tmpfolder -i /path/to/another/folder/debian-8.8.0-amd64-netinst.iso -f /path/to/outputfolder/ -p preseed-vsphere-controlvm.cfg`
 7. Import the resulting iso file to your vSphere datastore, create a new VM and use the iso image to install the Control-VM on it
 
-[Back to README.md](../../README.md)
+[back](../../)

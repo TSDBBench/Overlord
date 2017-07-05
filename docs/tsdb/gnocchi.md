@@ -4,4 +4,4 @@
 
 * http://gnocchi.xyz/
 
-[Back to README.md](../../README.md)
+[back](../../)

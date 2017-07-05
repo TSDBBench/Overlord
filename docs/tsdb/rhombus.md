@@ -19,4 +19,4 @@
 * Nothing must be installed on the server besides Cassandra
 * COUNT() instead of AVG()/SUM()
 
-[Back to README.md](../../README.md)
+[back](../../)

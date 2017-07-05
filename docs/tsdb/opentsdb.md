@@ -59,4 +59,4 @@
     * https://peritusconsulting.github.io/articles/2014-06-02-next-generation-monitoring-using-opentsdb.html
     * https://www.mapr.com/blog/loading-time-series-database-100-million-points-second
 
-[Back to README.md](../../README.md)
+[back](../../)

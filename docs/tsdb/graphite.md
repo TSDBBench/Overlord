@@ -4,4 +4,4 @@
 
 * http://graphite.readthedocs.io/en/latest/
 
-[Back to README.md](../../README.md)
+[back](../../)

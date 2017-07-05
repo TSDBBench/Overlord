@@ -32,4 +32,4 @@
 * http://de.slideshare.net/codyaray/scalable-distributed-stats-infrastructure
 * https://prezi.com/ajkjic0jdws3/kairosdb-cassandra-schema/
 
-[Back to README.md](../../README.md)
+[back](../../)
