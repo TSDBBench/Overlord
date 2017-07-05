@@ -2,8 +2,30 @@
 
 This is the Python and Vagrant part of TSDBBench
 
+<!-- toc -->
+
+- [Supported databases](#supported-databases)
+  * [Timeseries databases with a requirement on NoSQL DBMS](#timeseries-databases-with-a-requirement-on-nosql-dbms)
+  * [Timeseries databases with no requirement on any DBMS](#timeseries-databases-with-no-requirement-on-any-dbms)
+  * [Column-oriented DBMS](#column-oriented-dbms)
+  * [Relational databases](#relational-databases)
+  * [Other](#other)
+- [Unsupported databases (WIP)](#unsupported-databases-wip)
+- [Supported Elastic Infrastructures](#supported-elastic-infrastructures)
+- [Initial Setup of the Elastic Infrastructure](#initial-setup-of-the-elastic-infrastructure)
+- [Initial Setup of local pc or Control-VM](#initial-setup-of-local-pc-or-control-vm)
+- [Running a testworkload](#running-a-testworkload)
+- [Creating html files (when not using -m)](#creating-html-files-when-not-using--m)
+- [Additional Information](#additional-information)
+- [Development Information](#development-information)
+- [Related Work](#related-work)
+
+<!-- tocstop -->
+
 ## Supported databases
-* Timeseries databases with a requirement on NoSQL DBMS:
+
+### Timeseries databases with a requirement on NoSQL DBMS
+
   * [Axibase](tsdb/axibase)
   * [Blueflood](tsdb/blueflood)
   * [Databus](tsdb/databus)
@@ -12,20 +34,27 @@ This is the Python and Vagrant part of TSDBBench
   * [OpenTSDB](tsdb/opentsdb)
   * [Rhombus](tsdb/rhombus)
   * [Graphite](tsdb/graphite)
-* Timeseries databases with no Requirement on any DBMS:
+
+### Timeseries databases with no requirement on any DBMS
+
   * [Akumuli](tsdb/akumuli)
   * [Druid](tsdb/druid)
   * [InfluxDB](tsdb/influxdb)
   * [Gnocchi](tsdb/gnocchi)
   * [Seriesly](tsdb/seriesly)
   * [Prometheus](tsdb/prometheus)
-* Column-oriented DBMS
+
+### Column-oriented DBMS
   * [MonetDB](tsdb/monetdb)
   * [Kdb+](tsdb/kdpplus)
-* Relational databases:
+
+### Relational databases
+
   * [MySQL](tsdb/mysql)
   * [PostgreSQL](tsdb/postgresql)
-* Other:
+
+### Other
+
   * [Elasticsearch](tsdb/elasticsearch)
   * [h5serv](tsdb/h5serv)
 
