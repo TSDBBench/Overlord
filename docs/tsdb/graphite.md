@@ -4,4 +4,4 @@
 
 * http://graphite.readthedocs.io/en/latest/
 
-[back](../../)
+[back](../)

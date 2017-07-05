@@ -4,4 +4,4 @@
 
 * https://github.com/akumuli/Akumuli
 
-[back](../../)
+[back](../)

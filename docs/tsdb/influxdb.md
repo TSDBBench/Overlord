@@ -20,4 +20,4 @@
     * see https://github.com/influxdb/influxdb/issues/2702
     * Fix: Using seconds instead of millisceonds, checking if the range does not exceed 100000 seconds
 
-[back](../../)
+[back](../)

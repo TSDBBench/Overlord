@@ -19,4 +19,4 @@
 * Nothing must be installed on the server besides Cassandra
 * COUNT() instead of AVG()/SUM()
 
-[back](../../)
+[back](../)

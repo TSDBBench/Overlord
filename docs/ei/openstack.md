@@ -43,4 +43,4 @@
 11. `./MakeDebianQcow2.py -i /path/to/outputfolder/debian-8.8.0-amd64-netinst-openstack-controlvm-autoinstall.iso -f /path/to/outputfolder/`
 12. Upload the resulting file to your Openstack Storage
 
-[back](../../)
+[back](../)

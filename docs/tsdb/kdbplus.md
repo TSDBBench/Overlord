@@ -4,4 +4,4 @@
 
 * https://kx.com/discover/
 
-[back](../../)
+[back](../)

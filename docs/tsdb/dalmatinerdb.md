@@ -28,4 +28,4 @@
   * vi etc/dalmatinerdb.conf # check the settings and adjust if needed
   * ./bin/ddb start
 
-[back](../../)
+[back](../)

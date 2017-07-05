@@ -4,4 +4,4 @@
 
 * https://github.com/dustin/seriesly
 
-[back](../../)
+[back](../)

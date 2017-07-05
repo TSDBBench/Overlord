@@ -4,4 +4,4 @@
 
 * https://www.elastic.co/de/products/elasticsearch
 
-[back](../../)
+[back](../)
