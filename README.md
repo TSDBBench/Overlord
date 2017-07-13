@@ -1,7 +1,7 @@
 # Overlord
 [![Build Status](https://api.travis-ci.org/TSDBBench/TSDBBench.svg?branch=master)](https://travis-ci.org/TSDBBench/TSDBBench)
 
-The Python and Vagrant part of TSDBBench that automatically setups and benchmarks tims series databases (TSDBs).
+The Python and Vagrant part of [TSDBBench](http://tsdbbench.github.io/) that automatically setups and benchmarks time series databases (TSDBs).
 
 The benchmarking is done with VMs that are automatically setup by Vagrant and are running on one of the five supported elastic infrastructures (EIs).
 
