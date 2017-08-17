@@ -1,0 +1,69 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+
+__author__ = 'Patrick Dabbert'
+__version__ = "0.01"
+
+# db_folders -> List of DB Folder (for space check)
+# db_client -> name of ycsb client
+# db_args -> special ycsb arguments for this db
+# db_name -> name of this db (e.g. for workload file)
+# db_desc -> more detailed name/description
+# jvm_args -> special jvm_args for this db and ycsb
+# prerun_once -> list of commands to run local once before ycsb (%%IP%% uses first db vm) (without ycsb, sync or space diff or poweroff commands!)
+# postrun_once -> list of commands to run local once after ycsb (%%IP%% uses first db vm) (without ycsb, sync or space diff or poweroff commands!)
+# prerun -> list of commands to run before ycsb (all vms or local) (without ycsb, sync or space diff or poweroff commands!)
+# postrun -> list of commands to run after ycsb (all vms or local) (without ycsb, sync or space diff or poweroff commands!)
+# prerun_master -> list of commands to run before ycsb (only on master(first=ID 0) vm or local)) (without ycsb, sync or space diff or poweroff commands!)
+# postrun_master -> list of commands to run after ycsb (only on master(first=ID 0) vm or local)) (without ycsb, sync or space diff or poweroff commands!)
+# prerun_slaves -> list of commands to run before ycsb (only on slave (all without master(=ID 0)) vms or local)) (without ycsb, sync or space diff or poweroff commands!)
+# postrun_slaves -> list of commands to run after ycsb (only on slave (all without master(=ID 0)) vms or local)) (without ycsb, sync or space diff or poweroff commands!)
+# prerun_dict -> list of commands to run before ycsb for each db vm (key=number of vm) (without ycsb, sync or space diff or poweroff commands!) (%%SSH%% not needed)
+# postrun_dict -> list of commands to run after ycsb for each db vm (key=number of vm) (without ycsb, sync or space diff or poweroff commands!) (%%SSH%% not needed)
+# check -> list of commands to run after prerun (all vms or local) for checking if everything runs correctly (systemctl start xyz oftern returns true even if start failed somehow. Check that here!)
+# check_master -> list of commands to run after prerun (all vms or local) for checking if everything runs correctly (only on master(first=ID 0) vm or local))
+# check_slaves -> list of commands to run after prerun (all vms or local) for checking if everything runs correctly (all without master(=ID 0)) vms or local))
+# check_dict -> list of commands to run after prerun for each db vm (key=number of vm) (without ycsb, sync or space diff or poweroff commands!) (%%SSH%% not needed)
+# basic -> True/False, if True this is a basic database, so no need to ssh for space checking
+# sequence -> which vm should be provisioned first? (for all postrun/prerun dicts/lists. First number is considered master db vm, rest are slaves.)
+# include -> which base modules should be imported and added to the dictionary (standard functions that are reusable). Warning: infinite import loop possible!
+# the following variables are possible in prerun_once, postrun_once, prerun, prerun_master, prerun_slaves, check, check_master, check_slaves, postrun, postrun_master, postrun_slaves, prerun_dict, postrun_dict, check_dict, db_args:
+# %%IP%% -> IP of (actual) db vm
+# %%IPgen%% -> IP of (actual) generator vm (on which this script runs)
+# %%IPn%% -> IP of db vm number n (e.g. %%IP2%%)
+# %%IPall%% -> give String with IP of all vms)
+# %%HN%% -> Hostname of (actual) db vm
+# %%HNgen%% -> Hostname of (actual) generator vm (on which this script runs)
+# %%HNn%% -> Hostname of db vm number n (e.g. %%HN2%%)
+# %%HNall%% -> give String with Hostname of all vms)
+# %%SSH%% -> if SSH should be used (set at the beginning)
+# Order of Preruns/Postruns:
+# 1. prerun/postrun/check, 2. prerun_master/postrun_master/check_master, 3. preun_skaves/postrun_slaves/check_slaves, 4.prerun_dict/postrun_dict/check_dict
+# General Order:
+#  prerun -> check -> ycsb -> postrun
+
+def getDict():
+    dbConfig={}
+    dbConfig["db_folders"]=["/hana"]
+    dbConfig["db_client"]="jdbc"
+    dbConfig["db_args"]="-cp /home/vagrant/YCSB-TS/ngdbc.jar -p db.driver=com.sap.db.jdbc.Driver -p db.url=jdbc:sap://%%IP%%:30013/?databaseName=SYSTEMDB -p db.user=SYSTEM -p db.passwd=<PASSWORD>"
+    dbConfig["db_name"]="hana1"
+    dbConfig["db_desc"]="SAP Hana Express on 1 VM."
+    dbConfig["jvm_args"]="-jvm-args='-Xmx4096m'"
+    dbConfig["prerun_once"]= []
+    dbConfig["postrun_once"]= []
+    dbConfig["prerun"]= ["cd ~"]
+    dbConfig["postrun"]= []
+    dbConfig["prerun_master"]= [ "%%SSH%%sudo -u hxeadm /usr/sap/HXE/HDB00/HDB start","%%SSH%%sudo -u hxeadm /usr/sap/HXE/HDB00/exe/hdbsql -i 00 -n localhost:30013 -u SYSTEM -p <PASSWORD> -I /home/vagrant/files/create_table.mysql" ] 
+    dbConfig["postrun_master"]= []
+    dbConfig["prerun_slaves"]= []
+    dbConfig["postrun_slaves"]= []
+    dbConfig["prerun_dict"]= {}
+    dbConfig["postrun_dict"]= {}
+    dbConfig["check"]= []
+    dbConfig["check_master"]= []
+    dbConfig["check_slaves"]= []
+    dbConfig["check_dict"]= {}
+    dbConfig["basic"]= False
+    dbConfig["sequence"]=[0]
+    return dbConfig
