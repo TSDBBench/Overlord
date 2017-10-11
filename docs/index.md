@@ -18,6 +18,7 @@ This is the Python and Vagrant part of TSDBBench
 - [Creating html files (when not using -m)](#creating-html-files-when-not-using--m)
 - [Additional Information](#additional-information)
 - [Development Information](#development-information)
+- [Funding](#funding)
 
 <!-- tocstop -->
 
@@ -165,3 +166,11 @@ This is the Python and Vagrant part of TSDBBench
 ## Development Information
 * Development specific details on databases and elastic infrastructures can be found on their specific files (see links at the beginning)
 * [Adding a New Database](dev/adding_database)
+
+## Funding
+
+TSDBBench received funding from the
+[Federal Ministry for Economic Affairs and Energy](http://www.bmwi.de/Navigation/EN/Home/home.html)
+in the context of the project [NEMAR](https://www.nemar.de/).
+
+![BMWi](https://tsdbbench.github.io/BMWi.jpg)
