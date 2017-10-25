@@ -19,5 +19,8 @@
 * GROUP BY with more than 100000 buckets can't be used
     * see https://github.com/influxdb/influxdb/issues/2702
     * Fix: Using seconds instead of millisceonds, checking if the range does not exceed 100000 seconds
+* <https://github.com/TSDBBench/Overlord/blob/master/vagrant_files/vagrantconf.rb> sets the variable `$links_influxdb ='https://s3.amazonaws.com/influxdb/influxdb_0.11.1-1_amd64.deb'`
+  It is used by the image generator (<https://github.com/TSDBBench/Overlord/blob/master/MakeDebianIso.py>).
+  The `.deb` itself is used by vagrant (<https://github.com/TSDBBench/Overlord/blob/master/vagrant_files/basic/influxdb.rb>). 
 
 [back](../)
