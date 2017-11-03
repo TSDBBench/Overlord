@@ -363,7 +363,7 @@ def wait_for_power_off(vm, logger, timeout=3600):
     return True
 
 # Configure ArgumentParser
-parser = argparse.ArgumentParser(prog="SetupVsphere.py",version=__version__,description="Bla", formatter_class=argparse.RawDescriptionHelpFormatter, epilog="")
+parser = argparse.ArgumentParser(prog="SetupVsphere.py",version=__version__,description="A helper tool to setup vSphere VM images.", formatter_class=argparse.RawDescriptionHelpFormatter, epilog="")
 parser.add_argument("-l", "--log", action='store_true', help="Be more verbose, log vagrant output.")
 parser.add_argument("-f", "--vagrantfolder", metavar="VAGRANT", required=True, help="Path to folder with Vagrantfiles")
 parser.add_argument("-o", "--overwrite", action='store_true', help="Deletes eventually existing templates/vms before creating them")
