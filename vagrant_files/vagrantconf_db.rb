@@ -22,3 +22,4 @@ end
 # 512mb is not enough for cassandra
 # 4096mb is not enough for cassandra + blueflood
 # 8096mb is not enough for druid (single)
+# 2048mb is a minimal requiered memory for ATSD
