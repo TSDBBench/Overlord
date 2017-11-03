@@ -3,7 +3,7 @@ python-dateutil
 pyvmomi
 jinja2
 python-magic
-bokeh==0.12.9
+bokeh==0.12.6
 pandas
 pdfkit
 webcolors
