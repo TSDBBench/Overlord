@@ -86,8 +86,14 @@ This is the Python and Vagrant part of TSDBBench
 1. Local PC:
     1. Install packages:
         ```bash
-        sudo apt-get install python-dateutil python-jinja2 python-numpy python-pandas python-flask python-redis python-requests python-six python-tornado python-werkzeug python-markupsafe python-greenlet python-zmq python-yaml python-pip wkhtmltopdf python-magic fabric vagrant zlib1g-dev zlib1g libxml2 libxml2-dev libxslt1.1 libxslt1-dev python-webcolors python-pyvmomi
+        sudo apt-get install python-dateutil python-jinja2 python-numpy \
+         python-pandas python-flask python-redis python-requests python-six \
+         python-tornado python-werkzeug python-markupsafe python-greenlet \
+         python-zmq python-yaml python-pip wkhtmltopdf python-magic fabric \
+         vagrant zlib1g-dev zlib1g libxml2 libxml2-dev libxslt1.1 libxslt1-dev \
+         python-webcolors python-pyvmomi
         ```
+
     2. Install pip packages:
         ```bash
         sudo pip install bokeh python-vagrant pdfkit
