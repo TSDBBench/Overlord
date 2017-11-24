@@ -1,0 +1,4 @@
+bokeh==0.12.6
+python-vagrant
+pdfkit
+

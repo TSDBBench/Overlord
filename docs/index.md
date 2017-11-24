@@ -94,12 +94,18 @@ This is the Python and Vagrant part of TSDBBench
          python-webcolors python-pyvmomi
         ```
 
+        A version of this package-list adapted for Arch-Linux is available as
+        `package-requirements`
+
     2. Install pip packages:
         ```bash
         sudo pip install bokeh python-vagrant pdfkit
         ```
+        Alternatively use `sudo pip install -r control-requirements.txt`
+
     3. Install vagrant plugins:
-        ```bashvagrant plugin install vagrant-vsphere
+        ```bash
+        vagrant plugin install vagrant-vsphere
         vagrant plugin install vagrant-openstack-provider
         ```
     4. Reconfigure locales and make sure that en_US.UTF-8 is generated
