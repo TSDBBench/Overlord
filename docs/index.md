@@ -86,14 +86,26 @@ This is the Python and Vagrant part of TSDBBench
 1. Local PC:
     1. Install packages:
         ```bash
-        sudo apt-get install python-dateutil python-jinja2 python-numpy python-pandas python-flask python-redis python-requests python-six python-tornado python-werkzeug python-markupsafe python-greenlet python-zmq python-yaml python-pip wkhtmltopdf python-magic fabric vagrant zlib1g-dev zlib1g libxml2 libxml2-dev libxslt1.1 libxslt1-dev python-webcolors python-pyvmomi
+        sudo apt-get install python-dateutil python-jinja2 python-numpy \
+         python-pandas python-flask python-redis python-requests python-six \
+         python-tornado python-werkzeug python-markupsafe python-greenlet \
+         python-zmq python-yaml python-pip wkhtmltopdf python-magic fabric \
+         vagrant zlib1g-dev zlib1g libxml2 libxml2-dev libxslt1.1 libxslt1-dev \
+         python-webcolors python-pyvmomi
         ```
+
+        A version of this package-list adapted for Arch-Linux is available as
+        `package-requirements`
+
     2. Install pip packages:
         ```bash
         sudo pip install bokeh python-vagrant pdfkit
         ```
+        Alternatively use `sudo pip install -r control-requirements.txt`
+
     3. Install vagrant plugins:
-        ```bashvagrant plugin install vagrant-vsphere
+        ```bash
+        vagrant plugin install vagrant-vsphere
         vagrant plugin install vagrant-openstack-provider
         ```
     4. Reconfigure locales and make sure that en_US.UTF-8 is generated
