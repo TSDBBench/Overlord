@@ -72,8 +72,10 @@ This is the Python and Vagrant part of TSDBBench
 * [Amazon Web Services](ei/aws)
 
 ## Initial Setup of the Elastic Infrastructure
+
+<!-- * All images were available at http://tsdbbench.allweathercomputing.com/bin/, can use them directly from there. However, the domain expired. -->
+
 * This must done only once and only for one elastic infrastructure
-* All images are available at http://tsdbbench.allweathercomputing.com/bin/, can use them directly from there.
 * See the articles for the five supported elastic infrastructures for specific instructions
     * [VMware vSphere](ei/vsphere)
     * [OpenStack](ei/openstack)
