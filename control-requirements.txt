@@ -1,4 +1,4 @@
-bokeh==0.12.6
+bokeh==3.8.2
 python-vagrant
 pdfkit
 
