@@ -142,7 +142,7 @@ class Vm():
             file_new.close()
             file_old.close()
         except Exception,e:
-            self.logger.error("An error occured while copying '%s' to '%s'." % (pathVagrantFileOld,
+            self.logger.error("An error occurred while copying '%s' to '%s'." % (pathVagrantFileOld,
                                                                                 pathVagrantFileNew), exc_info=True)
         # else:
         #     if not Util.copy_file(pathVagrantFileOld,pathVagrantFileNew,self.logger):
